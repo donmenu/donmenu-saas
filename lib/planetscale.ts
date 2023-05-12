@@ -9,8 +9,15 @@ interface User {
   email: string;
 }
 
+interface Cardapio {
+  id: Generated<number>;
+  item: string;
+  status: string;
+}
+
 interface Database {
   users: User;
+  cardapios: Cardapio;
   // https://github.com/nextauthjs/next-auth/issues/4922
 }
 

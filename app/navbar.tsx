@@ -8,8 +8,12 @@ import { signIn, signOut } from 'next-auth/react';
 import Image from 'next/image';
 
 const navigation = [
-  { name: 'Dashboard', href: '/' },
-  { name: 'Playground', href: '/playground' }
+  { name: 'Home', href: '/' },
+  { name: 'Dashboard', href: '/playground' },
+  { name: 'Cardapio', href: '/cardapio' },
+  { name: 'Blog', href: '/blog' },
+  { name: 'Sobre', href: '/sobre' },
+  { name: 'Contato', href: '/contato' }
 ];
 
 function classNames(...classes: string[]) {
