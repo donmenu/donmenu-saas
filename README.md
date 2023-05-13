@@ -3,7 +3,7 @@
   <source media="(prefers-color-scheme: light)" srcset="https://user-images.githubusercontent.com/9113740/201498152-b171abb8-9225-487a-821c-6ff49ee48579.png">
   <img alt="Shows all of the tools in the stack for this template, also listed in the README file." src="https://user-images.githubusercontent.com/9113740/201498152-b171abb8-9225-487a-821c-6ff49ee48579.png">
 </picture>
-
+Next.js 13 + PlanetScale + NextAuth + Tailwind CSS
 <div align="center"><strong>Next.js 13 Admin Dashboard Template</strong></div>
 <div align="center">Built with the new `app` directory (beta).</div>
 <br />

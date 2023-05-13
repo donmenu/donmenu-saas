@@ -7,9 +7,9 @@ import Footer from './footer';
 import { Suspense } from 'react';
 
 export const metadata = {
-  title: 'Next.js 13 + PlanetScale + NextAuth + Tailwind CSS',
+  title: 'Don Menu',
   description:
-    'A user admin dashboard configured with Next.js, PlanetScale, NextAuth, Tailwind CSS, TypeScript, ESLint, and Prettier.'
+    'Don Menu é um sistema de cardápio digital para restaurantes, bares e lanchonetes.'
 };
 
 export default async function RootLayout({
