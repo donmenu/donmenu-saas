@@ -26,7 +26,7 @@ export default async function RootLayout({
         </Suspense>
         {children}
         <AnalyticsWrapper />
-        <Toast />
+        {/*<Toast />*/}
         <Footer/>
       </body>
     </html>

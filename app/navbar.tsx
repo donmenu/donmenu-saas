@@ -10,6 +10,7 @@ import Image from 'next/image';
 const navigation = [
   { name: 'Home', href: '/' },
   { name: 'Dashboard', href: '/playground' },
+  { name: 'Usuários', href: '/users' },
   { name: 'Cardapio', href: '/cardapio' },
   { name: 'Blog', href: '/blog' },
   { name: 'Sobre', href: '/sobre' },
