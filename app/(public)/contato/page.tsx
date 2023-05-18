@@ -85,20 +85,20 @@ export default function ContatoPage() {
           </div>
           <div className="sm:col-span-2">
             <label htmlFor="phone-number" className="block text-sm font-semibold leading-6 text-gray-900">
-              Phone number
+              whatsapp
             </label>
             <div className="relative mt-2.5">
               <div className="absolute inset-y-0 left-0 flex items-center">
                 <label htmlFor="country" className="sr-only">
-                  Country
+                  país
                 </label>
                 <select
                   id="country"
                   name="country"
                   className="h-full rounded-md border-0 bg-transparent bg-none py-0 pl-4 pr-9 text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm"
                 >
-                  <option>US</option>
-                  <option>CA</option>
+                  <option>BR</option>
+                  <option>AR</option>
                   <option>EU</option>
                 </select>
                 <ChevronDownIcon
@@ -117,7 +117,7 @@ export default function ContatoPage() {
           </div>
           <div className="sm:col-span-2">
             <label htmlFor="message" className="block text-sm font-semibold leading-6 text-gray-900">
-              Message
+              Mensagem
             </label>
             <div className="mt-2.5">
               <textarea
@@ -150,9 +150,9 @@ export default function ContatoPage() {
               </Switch>
             </div>
             <Switch.Label className="text-sm leading-6 text-gray-600">
-              By selecting this, you agree to our{' '}
+              Selecionando, você concorda com nossos{' '}
               <a href="#" className="font-semibold text-indigo-600">
-                privacy&nbsp;policy
+                termos de&nbsp;privacidade
               </a>
               .
             </Switch.Label>
