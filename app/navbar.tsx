@@ -9,8 +9,8 @@ import Image from 'next/image';
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Blog', href: '/blog' },
   { name: 'Sobre', href: '/sobre' },
+  { name: 'Blog', href: '/blog' },
   { name: 'Contato', href: '/contato' }
 ];
 
@@ -103,7 +103,7 @@ export default function Navbar({ user }: { user: any }) {
                               )}
                               onClick={() => signOut()}
                             >
-                              Sign out
+                              Sair
                             </button>
                           )}
                         </Menu.Item>
@@ -128,7 +128,7 @@ export default function Navbar({ user }: { user: any }) {
               </div>
               <div className="-mr-2 flex items-center sm:hidden">
                 <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-white p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">
-                  <span className="sr-only">Open main menu</span>
+                  <span className="sr-only">Abrir menu principal</span>
                   {open ? (
                     <XMarkIcon className="block h-6 w-6" aria-hidden="true" />
                   ) : (
@@ -185,7 +185,7 @@ export default function Navbar({ user }: { user: any }) {
                       onClick={() => signOut()}
                       className="block px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                     >
-                      Sign out
+                      Sair
                     </button>
                   </div>
                 </>
@@ -195,7 +195,7 @@ export default function Navbar({ user }: { user: any }) {
                     onClick={() => signIn('github')}
                     className="flex w-full px-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800"
                   >
-                    Sign in
+                    Login
                   </button>
                 </div>
               )}

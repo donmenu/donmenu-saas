@@ -34,7 +34,7 @@ export default function Footer() {
                         </a>
                     </div>                    
                 </nav>
-                <p className="mt-8 text-center text-base text-gray-400">&copy; 2021 Orçamento Inteligente. Todos os direitos reservados.</p>
+                <p className="mt-8 text-center text-base text-gray-400">&copy; 2021 Don Menu. Todos os direitos reservados.</p>
             </div>
         </footer>
     )
