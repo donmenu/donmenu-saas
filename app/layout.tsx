@@ -5,6 +5,7 @@ import AnalyticsWrapper from './analytics';
 import Toast from './toast';
 import Footer from './footer';
 import { Suspense } from 'react';
+import ToggleDarkMode from './(components)/toogleDarkMode';
 
 export const metadata = {
   title: 'Don Menu',

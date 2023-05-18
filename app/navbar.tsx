@@ -117,7 +117,7 @@ export default function Navbar({ user }: { user: any }) {
                               )}
                               onClick={() => signIn('github')}
                             >
-                              Sign in
+                              Login
                             </button>
                           )}
                         </Menu.Item>
