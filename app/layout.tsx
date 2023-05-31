@@ -10,7 +10,9 @@ import ToggleDarkMode from './(components)/toogleDarkMode';
 export const metadata = {
   title: 'Don Menu',
   description:
-    'Don Menu é um sistema de cardápio digital para restaurantes, bares e lanchonetes.'
+    'Don Menu é um sistema de cardápio digital para restaurantes, bares e lanchonetes.',
+  url: 'https://donmenu.com.br',
+  siteName: 'Don Menu'
 };
 
 export default async function RootLayout({

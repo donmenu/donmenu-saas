@@ -24,3 +24,87 @@ model cardapios {
   item   String? @db.VarChar(45)
   status String? @db.VarChar(45)
 }
+
+model categories {
+  category_id Int    @id @default(autoincrement())
+  name        String @db.VarChar(45)
+}
+
+model ingredients {
+  ingredient_id Int    @id @default(autoincrement())
+  name          String @db.VarChar(45)
+  unit          String @db.VarChar(45)
+  cost_per_unit String @db.VarChar(45)
+}
+
+model item_ingredients {
+  item_ingredient_id Int     @id @default(autoincrement())
+  item_id            Int
+  ingredient_id      Int
+  quantity           String? @db.VarChar(45)
+}
+
+model itens {
+  item_id     Int    @id @default(autoincrement())
+  category_id Int
+  name        String @db.VarChar(45)
+  description String @db.VarChar(255)
+  price       String @db.VarChar(45)
+}
+
+model itens_pricing {
+  item_pricing_id Int @id @default(autoincrement())
+  item_id         Int
+  rule_id         Int
+}
+
+model menu_items_price {
+  menu_item_price_id Int     @id @default(autoincrement())
+  menu_item_id       String? @db.VarChar(45)
+  price              String? @db.VarChar(45)
+  start_date         String? @db.VarChar(45)
+  end_date           String? @db.VarChar(45)
+}
+
+model menu_itens {
+  menu_item_id Int @id @default(autoincrement())
+  menu_id      Int
+  item_id      Int
+}
+
+model menu_promotions {
+  menu_promotion_id Int     @id @default(autoincrement())
+  menu_id           Int?
+  name              String? @db.VarChar(45)
+  description       String? @db.VarChar(45)
+  start_date        String? @db.VarChar(45)
+  end_date          String? @db.VarChar(45)
+}
+
+model menus {
+  menu_id       Int     @id @default(autoincrement())
+  restaurant_id Int?
+  name          String? @db.VarChar(45)
+  description   String? @db.VarChar(255)
+
+  @@index([restaurant_id], map: "restaurant_id_idx")
+}
+
+model pricing_methods {
+  method_id   Int    @id @default(autoincrement())
+  name        String @db.VarChar(45)
+  description String @db.VarChar(45)
+}
+
+model pricing_rules {
+  rule_id             Int     @id @default(autoincrement())
+  method_id           String? @db.VarChar(45)
+  name                String? @db.VarChar(45)
+  description         String? @db.VarChar(45)
+  calculation_formula String? @db.VarChar(45)
+}
+
+model restaurants {
+  restaurant_id Int     @id @default(autoincrement())
+  name          String? @db.VarChar(45)
+}
