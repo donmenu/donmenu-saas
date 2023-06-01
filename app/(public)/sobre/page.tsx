@@ -16,53 +16,79 @@ export default function SobrePage() {
           <h1 className="text-3xl font-bold text-gray-900 tracking-wide leading-tight mb-4">
             Como surgiu
         </h1>
-            <p className="mt-4 text-lg text-gray-500">
-              Em 2021, Wellington Patriota decidiu abrir um restaurante. Utilizando um aplicativo de delivery para gerenciar os pedidos, ele enfrentou dificuldades para encontrar o preço certo a ser cobrado dos clientes, afetando a lucratividade do negócio.
-            </p>
-            <div className="flex justify-center md:justify-start items-center mt-4">
-              <Image
-                src="/images/somar.svg"
-                alt="Picture of the author"
-                className="w-20 h-20 rounded-full"
-                width={400}
-                height={400}
-              />
-              <p className="ml-2 text-lg text-gray-500">
-                Sua ideia foi registrada para a competição Programa Somar em São Paulo, promovida pela aceleradora de startups b2Mamy. Entre 100 empreendedores, Wellington ficou em segundo lugar, recebendo investimento e mentoria para transformar sua visão em realidade.
-              </p>
-            </div>
+        <p className="mt-4 text-lg text-gray-500 font-light tracking-wide">
+  Em 2021, Wellington Patriota decidiu abrir um restaurante. Utilizando um aplicativo de delivery para gerenciar os pedidos, ele enfrentou dificuldades para encontrar o preço certo a ser cobrado dos clientes, o que impactou diretamente a lucratividade do negócio.
+</p>
+
+<div className="flex justify-center md:justify-start items-center mt-4 space-x-4">
+  <div className="flex-shrink-0">
+    <div className="bg-gray-200 rounded-full p-1">
+      <Image
+        src="/images/somar.svg"
+        alt="Picture of the author"
+        className="rounded-full"
+        width={300}
+        height={300}
+      />
+    </div>
+  </div>
+  <div className="text-gray-800">
+    <p className="text-lg font-medium">
+      Sua ideia foi registrada para o Programa de aceleração de empresas Somar em São Paulo, promovido pela aceleradora de startups B2Mammy. Entre 100 empreendedores, Wellington ficou em segundo lugar, recebendo investimento e mentoria para transformar sua visão em realidade.
+    </p>
+  </div>
+</div>
+
             <p className="mt-4 text-lg text-gray-500">
               O Don Menu é uma plataforma que capacita restaurantes de pequeno e médio porte no Brasil, fornecendo assistência precisa em orçamentação e precificação. Através do Don Menu, os restaurantes têm as informações necessárias para evitar armadilhas financeiras e prosperar no competitivo cenário culinário.
             </p>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center mt-8 text-center text-base text-gray-400">
-          <div className="md:w-1/2">
-            <Image
-              src="/images/chef.svg"
-              alt="Picture of the author"
-              className="w-60 h-60 rounded-full mx-auto md:mx-0"
-                width={240}
-                height={240}
-            />
-          </div>
-          <div className="md:w-1/2">
-            <p className="mt-4 text-lg text-gray-500">
-              Assista à apresentação da ideia no vídeo abaixo:
-            </p>
-            <div className="w-full h-0 relative" style={{ paddingBottom: '56.25%' }}>
-              <iframe
-                src="https://www.youtube.com/embed/fK3zLS9cFg0"
-                title="YouTube video player"
-                className="absolute top-0 left-0 w-full h-full"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              ></iframe>
-            </div>
-            <p className="mt-4 text-lg text-gray-500">
-              O momento em que Wellington recebe o prêmio pode ser encontrado a partir de 3:20:00 até 3:23:07 no vídeo.
-            </p>
-          </div>
-        </div>
+
+
+
+
+        <div className="flex flex-col md:flex-row items-center mt-8 text-center">
+  <div className="md:w-1/2">
+    <div className="bg-gray-100 rounded-lg p-4">
+      <Image
+        src="/images/chef.svg"
+        alt="Picture of the author"
+        className="w-48 h-48 mx-auto mb-4"
+        width={192}
+        height={192}
+      />
+      <p className="text-lg text-gray-600">
+        Assista à apresentação da ideia no vídeo abaixo:
+      </p>
+      <div className="w-full relative" style={{ paddingBottom: '56.25%' }}>
+        <iframe
+          src="https://www.youtube.com/embed/fK3zLS9cFg0"
+          title="YouTube video player"
+          className="absolute top-0 left-0 w-full h-full rounded-lg"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+
+  
+  <div className="md:w-1/2 bg-gray-100 p-6 rounded-lg">
+  <p className="text-lg text-gray-600 mb-4">
+    A apresentação pode ser encontrada a partir de <span className="font-bold">1:00:00</span> até <span className="font-bold">1:03:00</span> no vídeo.
+  </p>
+  <p className="text-lg text-gray-600">
+    O momento em que Wellington recebe o prêmio pode ser encontrado a partir de <span className="font-bold">3:20:00</span> até <span className="font-bold">3:23:07</span> no vídeo.
+  </p>
+</div>
+
+</div>
+
+
+
+
+
+
       </div>
     </div>
   );
