@@ -24,7 +24,36 @@ export const metadata = {
                         <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
                             <div className="flex items-center">                                
                                 <a href="/dashboard/cardapio" className="text-sm  ml-2">
-                                    <span className="text-sm  ml-2">Produtos</span>
+                                    <span className="text-sm  ml-2">Cardápios</span>
+                                </a>
+                            </div>
+                        </li>
+                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
+                            <div className="flex items-center">                                
+                                <a href="/dashboard/supplies" className="text-sm  ml-2">
+                                    <span className="text-sm  ml-2">Insumos</span>
+                                </a>
+                            </div>
+                        </li>
+                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
+                            <div className="flex items-center">                                
+                                <a href="/dashboard/supplies" className="text-sm  ml-2">
+                                    <span className="text-sm  ml-2">Fichas técnicas</span>
+                                </a>
+                            </div>
+                        </li>
+                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
+                            <div className="flex items-center">                                
+                                <a href="/dashboard/supplies" className="text-sm  ml-2">
+                                    <span className="text-sm  ml-2">Delivery</span>
+                                </a>
+                            </div>
+                        </li>
+                        
+                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
+                            <div className="flex items-center">                                
+                                <a href="/dashboard/supplies" className="text-sm  ml-2">
+                                    <span className="text-sm  ml-2">Promoções</span>
                                 </a>
                             </div>
                         </li>
@@ -35,27 +64,20 @@ export const metadata = {
                         </li>
                         <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
                             <div className="flex items-center">                                
-                                <span className="text-sm  ml-2">Delivery</span>
+                                <a href="/dashboard/supplies" className="text-sm  ml-2">
+                                    <span className="text-sm  ml-2">Pedidos</span>
+                                </a>
                             </div>
                         </li>
+                        
                         <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
-                            <div className="flex items-center">                                
-                                <span className="text-sm  ml-2">Pedidos</span>
-                            </div>
-                        </li>
-                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
-                            <div className="flex items-center">                                
-                                <span className="text-sm  ml-2">Inventario</span>
-                            </div>
-                        </li>
-                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center">
                             <a href="/dashboard/users" className="flex items-center">
                                 <div className="flex items-center">                                
                                     <span className="text-sm  ml-2">Usuários</span>
                                 </div>
                             </a>
                         </li>
-                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center">
+                        <li className="flex w-full justify-between text-gray-600 hover:text-gray-500 cursor-pointer items-center mb-6">
                             <a href="/dashboard/settings" className="flex items-center">
                                 <div className="flex items-center">                                
                                     <span className="text-sm  ml-2">Configurações</span>

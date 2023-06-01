@@ -26,17 +26,17 @@ const app = [
 
 const data = [
   {
-    category: 'Website',
+    category: 'Site',
     stat: '10,234',
     data: website
   },
   {
-    category: 'Online Shop',
+    category: 'Delivery',
     stat: '12,543',
     data: shop
   },
   {
-    category: 'Mobile App',
+    category: 'Ifood',
     stat: '2,543',
     data: app
   }
@@ -51,17 +51,17 @@ const categories: {
   metricPrev: string;
 }[] = [
   {
-    title: 'Sales',
-    metric: '$ 12,699',
-    metricPrev: '$ 9,456'
+    title: 'Vendas',
+    metric: 'R$ 12,699',
+    metricPrev: 'R$ 9,456'
   },
   {
-    title: 'Profit',
-    metric: '$ 40,598',
-    metricPrev: '$ 45,564'
+    title: 'Metas',
+    metric: 'R$ 40,598',
+    metricPrev: 'R$ 45,564'
   },
   {
-    title: 'Customers',
+    title: 'Clientes',
     metric: '1,072',
     metricPrev: '856'
   }
