@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function IndexPage() {
   return (
     <div className="bg-gradient">
@@ -26,26 +28,42 @@ export default function IndexPage() {
             </defs>
           </svg>
           <div className="mx-auto max-w-md text-center lg:mx-0 lg:flex-auto lg:py-32 lg:text-left">
-            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-3xl">
-              Precificar não é mais um problema              
-            </h1>
-            <p className="mt-6 text-lg leading-8 text-gray-300">
-              Uma plataforma de gestão de cardápios que te ajuda a precificar seus produtos de forma rápida e fácil.
-            </p>
-            <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
-              <a
-                href="#"
-                className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-              >
-                Conheça agora!
-              </a>
-              <a href="/welcome" className="text-sm font-semibold leading-6 text-white">
-                Saiba mais <span aria-hidden="true">→</span>
-              </a>
+            
+          <div className="flex items-center">
+            <div className="relative">
+              <h1 className="text-3xl font-bold tracking-tight text-white sm:text-3xl font-montserrat">
+                <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-transparent bg-clip-text">Precificar não é mais</span> um problema
+              </h1>
+              <div className="absolute top-1/2 left-full ml-4 -translate-y-1/2">
+                <Image
+                  className="w-8 h-8 rounded-full bg-white/5 shadow-sm"
+                  src="/images/logo.svg"
+                  alt="logo do app"
+                  width={32}
+                  height={32}
+                />
+              </div>
             </div>
           </div>
+
+          <p className="mt-6 text-lg leading-8 text-gray-600">
+            Uma solução simples e intuitiva para a gestão de cardápios e precificação de produtos.
+          </p>
+
+          <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
+            <a
+              href="/welcome"
+              className="rounded-md bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-pink-500 hover:to-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Conheça agora!
+          </a>
+  
+
+</div>
+
+          </div>
           <div className="relative mt-16 h-80 lg:mt-8">
-            <img
+            <Image
               className="absolute left-0 top-0 w-[57rem] max-w-none rounded-md bg-white/5 ring-1 ring-white/10"
               src="/images/paneldashboard.svg"
               alt="App screenshot"
@@ -53,6 +71,8 @@ export default function IndexPage() {
               height={1080}
             />
           </div>
+
+          
         </div>
       </div>
     </div>
