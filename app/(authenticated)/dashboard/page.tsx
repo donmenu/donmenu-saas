@@ -1,5 +1,12 @@
+'use client'
+
 import { Card, Metric, Text, Flex, Grid, Title, BarList } from '@tremor/react';
 import Chart from './chart';
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
 
 const website = [
   { name: '/home', value: 1230 },
@@ -67,7 +74,21 @@ const categories: {
   }
 ];
 
+
 export default function PlaygroundPage() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
+  }, [status, router])
+
+  if (status === 'loading') {
+    return <p className="text-center mt-10">Carregando...</p>
+  }
+
   return (
     <main className="p-4 md:p-10 mx-auto max-w-7xl">
       <Grid className="gap-6" numColsSm={2} numColsLg={3}>

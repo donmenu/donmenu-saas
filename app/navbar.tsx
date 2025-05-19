@@ -12,6 +12,12 @@ const navigation = [
   { name: 'Sobre Nós', href: '/sobre' },
   { name: 'Nosso time', href: '/team' },
   { name: 'Blog', href: '/blog' },
+  { name: 'Preços', href: '/pricing' },
+  /*{ name: 'Fale Conosco', href: '/fale-conosco' },
+  { name: 'Ajuda', href: '/ajuda' },
+  { name: 'FAQ', href: '/faq' },
+  { name: 'Termos de Uso', href: '/termos-de-uso' },
+  { name: 'Política de Privacidade', href: '/politica-de-privacidade' },*/
   { name: 'Contato', href: '/contato' }
 ];
 
