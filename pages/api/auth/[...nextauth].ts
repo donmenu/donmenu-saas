@@ -13,9 +13,11 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.FACEBOOK_SECRET as string,
     }),
   ],
+  pages: {
+    signIn: '/login' // <- define sua página personalizada
+  },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Sempre redireciona pro dashboard após login
       return `${baseUrl}/dashboard`
     },
   },

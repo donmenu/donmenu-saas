@@ -77,7 +77,7 @@ export default function Navbar({ user }: { user: any }) {
                       'text-sm'
                     )}>Olá, {user.name}</span>
                     <button
-                      onClick={() => signOut()}
+                      onClick={() => signOut({ callbackUrl: '/' })}
                       className={`text-sm ${isDashboard ? 'text-white' : 'text-gray-600'} hover:underline`}
                     >
                       Sair
@@ -135,7 +135,7 @@ export default function Navbar({ user }: { user: any }) {
                   />
                   <span className="text-base font-medium text-gray-800">{user.name}</span>
                   <button
-                    onClick={() => signOut()}
+                    onClick={() => signOut({ callbackUrl: '/' })}
                     className="ml-auto text-sm text-gray-600 hover:underline"
                   >
                     Sair
