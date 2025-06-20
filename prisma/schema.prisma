@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -13,43 +13,52 @@ model teste {
 
 model users {
   id       Int     @id @default(autoincrement())
-  name     String? @db.VarChar(45)
-  username String? @db.VarChar(45)
-  email    String? @db.VarChar(45)
-  obs      String? @db.VarChar(45)
+  name     String?
+  username String?
+  email    String?
+  obs      String?
 }
 
 model cardapios {
   id     Int     @id @default(autoincrement())
-  item   String? @db.VarChar(45)
-  status String? @db.VarChar(45)
+  item   String?
+  status String?
 }
 
 model categories {
-  category_id Int    @id @default(autoincrement())
-  name        String @db.VarChar(45)
+  category_id Int     @id @default(autoincrement())
+  name        String
+  description String?
+  itens       itens[]
 }
 
 model ingredients {
-  ingredient_id Int    @id @default(autoincrement())
-  name          String @db.VarChar(45)
-  unit          String @db.VarChar(45)
-  cost_per_unit String @db.VarChar(45)
+  ingredient_id      Int                  @id @default(autoincrement())
+  name               String
+  unit               String
+  cost_per_unit      Decimal
+  stock              Decimal?             @default(0)
+  created_at         DateTime             @default(now())
+  ficha_ingredientes ficha_ingredientes[]
 }
 
 model item_ingredients {
-  item_ingredient_id Int     @id @default(autoincrement())
+  item_ingredient_id Int      @id @default(autoincrement())
   item_id            Int
   ingredient_id      Int
-  quantity           String? @db.VarChar(45)
+  quantity           Decimal?
 }
 
 model itens {
-  item_id     Int    @id @default(autoincrement())
-  category_id Int
-  name        String @db.VarChar(45)
-  description String @db.VarChar(255)
-  price       String @db.VarChar(45)
+  item_id         Int               @id @default(autoincrement())
+  category_id     Int
+  name            String
+  description     String
+  price           Decimal
+  status          Boolean           @default(true)
+  created_at      DateTime          @default(now())
+  fichas_tecnicas fichas_tecnicas[]
+  category        categories        @relation(fields: [category_id], references: [category_id])
 }
 
 model itens_pricing {
@@ -59,11 +68,11 @@ model itens_pricing {
 }
 
 model menu_items_price {
-  menu_item_price_id Int     @id @default(autoincrement())
-  menu_item_id       String? @db.VarChar(45)
-  price              String? @db.VarChar(45)
-  start_date         String? @db.VarChar(45)
-  end_date           String? @db.VarChar(45)
+  menu_item_price_id Int       @id @default(autoincrement())
+  menu_item_id       Int?
+  price              Decimal?
+  start_date         DateTime?
+  end_date           DateTime?
 }
 
 model menu_itens {
@@ -73,38 +82,58 @@ model menu_itens {
 }
 
 model menu_promotions {
-  menu_promotion_id Int     @id @default(autoincrement())
+  menu_promotion_id Int       @id @default(autoincrement())
   menu_id           Int?
-  name              String? @db.VarChar(45)
-  description       String? @db.VarChar(45)
-  start_date        String? @db.VarChar(45)
-  end_date          String? @db.VarChar(45)
+  name              String?
+  description       String?
+  start_date        DateTime?
+  end_date          DateTime?
 }
 
 model menus {
   menu_id       Int     @id @default(autoincrement())
   restaurant_id Int?
-  name          String? @db.VarChar(45)
-  description   String? @db.VarChar(255)
+  name          String?
+  description   String?
 
   @@index([restaurant_id], map: "restaurant_id_idx")
 }
 
 model pricing_methods {
   method_id   Int    @id @default(autoincrement())
-  name        String @db.VarChar(45)
-  description String @db.VarChar(45)
+  name        String
+  description String
 }
 
 model pricing_rules {
   rule_id             Int     @id @default(autoincrement())
-  method_id           String? @db.VarChar(45)
-  name                String? @db.VarChar(45)
-  description         String? @db.VarChar(45)
-  calculation_formula String? @db.VarChar(45)
+  method_id           Int?
+  name                String?
+  description         String?
+  calculation_formula String?
 }
 
 model restaurants {
   restaurant_id Int     @id @default(autoincrement())
-  name          String? @db.VarChar(45)
+  name          String?
+}
+
+model fichas_tecnicas {
+  ficha_id           Int                  @id @default(autoincrement())
+  item_id            Int
+  yield              Decimal?
+  total_cost         Decimal?
+  price_suggestion   Decimal?
+  created_at         DateTime             @default(now())
+  ficha_ingredientes ficha_ingredientes[]
+  item               itens                @relation(fields: [item_id], references: [item_id], onDelete: Cascade)
+}
+
+model ficha_ingredientes {
+  id            Int             @id @default(autoincrement())
+  ficha_id      Int
+  ingredient_id Int
+  quantity      Decimal
+  ficha_tecnica fichas_tecnicas @relation(fields: [ficha_id], references: [ficha_id], onDelete: Cascade)
+  ingredient    ingredients     @relation(fields: [ingredient_id], references: [ingredient_id])
 }

@@ -19,7 +19,7 @@ export default function Sidebar() {
             <a href="/dashboard/supplies" className="block text-sm hover:text-purple-400">Insumos</a>
           </li>
           <li>
-            <a href="/dashboard/supplies" className="block text-sm hover:text-purple-400">Fichas técnicas</a>
+            <a href="/dashboard/ficha-tecnica" className="block text-sm hover:text-purple-400">Fichas técnicas</a>
           </li>
           <li>
             <a href="/dashboard/supplies" className="block text-sm hover:text-purple-400">Delivery</a>
