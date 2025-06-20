@@ -360,6 +360,109 @@ async function main() {
     console.log(`✅ Item da venda criado`)
   }
 
+  // Criar categorias financeiras
+  console.log('💰 Criando categorias financeiras...')
+  const financialCategories = [
+    { name: 'Vendas de Alimentos', type: 'receita', description: 'Receitas provenientes de vendas de alimentos', color: '#10B981' },
+    { name: 'Vendas de Bebidas', type: 'receita', description: 'Receitas provenientes de vendas de bebidas', color: '#3B82F6' },
+    { name: 'Delivery', type: 'receita', description: 'Receitas de delivery e entrega', color: '#8B5CF6' },
+    { name: 'Outras Receitas', type: 'receita', description: 'Outras receitas diversas', color: '#06B6D4' },
+    { name: 'Fornecedores', type: 'despesa', description: 'Despesas com fornecedores de ingredientes', color: '#EF4444' },
+    { name: 'Funcionários', type: 'despesa', description: 'Despesas com salários e benefícios', color: '#F59E0B' },
+    { name: 'Aluguel', type: 'despesa', description: 'Despesas com aluguel do estabelecimento', color: '#EC4899' },
+    { name: 'Contas Públicas', type: 'despesa', description: 'Água, luz, telefone, internet', color: '#84CC16' },
+    { name: 'Manutenção', type: 'despesa', description: 'Despesas com manutenção de equipamentos', color: '#F97316' },
+    { name: 'Marketing', type: 'despesa', description: 'Despesas com publicidade e marketing', color: '#6366F1' }
+  ]
+
+  const createdFinancialCategories: any[] = []
+  for (const category of financialCategories) {
+    const created = await prisma.financialCategory.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...category
+      }
+    })
+    createdFinancialCategories.push(created)
+    console.log(`✅ Categoria financeira criada: ${created.name}`)
+  }
+
+  // Criar um caixa de exemplo
+  console.log('💼 Criando caixa de exemplo...')
+  const caixa = await prisma.cashRegister.create({
+    data: {
+      restaurant_id: restaurant.id,
+      initial_amount: 100.00,
+      notes: 'Caixa inicial do restaurante',
+      status: 'aberto'
+    }
+  })
+  console.log(`✅ Caixa criado com valor inicial: R$ ${caixa.initial_amount}`)
+
+  // Criar algumas receitas de exemplo
+  console.log('📈 Criando receitas de exemplo...')
+  const receitas = [
+    {
+      description: 'Venda de X-Burger',
+      amount: 25.90,
+      revenue_date: new Date(),
+      payment_method: 'cartão',
+      category_id: createdFinancialCategories[0].id, // Vendas de Alimentos
+      cash_register_id: caixa.id
+    },
+    {
+      description: 'Venda de Batata Frita',
+      amount: 12.90,
+      revenue_date: new Date(),
+      payment_method: 'dinheiro',
+      category_id: createdFinancialCategories[0].id, // Vendas de Alimentos
+      cash_register_id: caixa.id
+    }
+  ]
+
+  for (const receita of receitas) {
+    await prisma.revenue.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...receita
+      }
+    })
+    console.log(`✅ Receita criada: ${receita.description}`)
+  }
+
+  // Criar algumas despesas de exemplo
+  console.log('📉 Criando despesas de exemplo...')
+  const despesas = [
+    {
+      description: 'Compra de ingredientes',
+      amount: 150.00,
+      expense_date: new Date(),
+      payment_method: 'pix',
+      supplier: 'Fornecedor ABC',
+      category_id: createdFinancialCategories[4].id, // Fornecedores
+      cash_register_id: caixa.id
+    },
+    {
+      description: 'Conta de luz',
+      amount: 89.50,
+      expense_date: new Date(),
+      payment_method: 'boleto',
+      supplier: 'Companhia de Energia',
+      category_id: createdFinancialCategories[7].id, // Contas Públicas
+      cash_register_id: caixa.id
+    }
+  ]
+
+  for (const despesa of despesas) {
+    await prisma.expense.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...despesa
+      }
+    })
+    console.log(`✅ Despesa criada: ${despesa.description}`)
+  }
+
   console.log('✅ Seed concluído com sucesso!')
   console.log('📊 Dados criados:')
   console.log(`   - 1 restaurante`)
@@ -371,6 +474,10 @@ async function main() {
   console.log(`   - ${createdMenuItems.length} itens do cardápio`)
   console.log(`   - ${combos.length} combos`)
   console.log(`   - ${sales.length} vendas`)
+  console.log(`   - ${financialCategories.length} categorias financeiras`)
+  console.log(`   - 1 caixa`)
+  console.log(`   - ${receitas.length} receitas`)
+  console.log(`   - ${despesas.length} despesas`)
   console.log('')
   console.log('🔑 Credenciais de acesso:')
   console.log(`   Email: admin@restauranteexemplo.com`)

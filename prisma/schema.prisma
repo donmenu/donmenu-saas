@@ -43,6 +43,12 @@ model Restaurant {
   sale_items  SaleItem[]
   ingredient_prices IngredientPrice[]
   recipe_ingredients RecipeIngredient[]
+  cash_registers CashRegister[]
+  financial_categories FinancialCategory[]
+  revenues    Revenue[]
+  expenses    Expense[]
+  orders      Order[]
+  order_items OrderItem[]
 
   @@map("restaurants")
 }
@@ -260,6 +266,7 @@ model MenuItem {
   category          Category?  @relation(fields: [category_id], references: [id])
   combo_items       ComboItem[]
   sale_items        SaleItem[]
+  order_items       OrderItem[]
 
   @@unique([restaurant_id, menu_id, name])
   @@map("menu_items")
@@ -374,6 +381,159 @@ model SaleItem {
   @@index([menu_item_id])
   @@index([combo_id])
   @@index([restaurant_id, created_at])
+}
+
+// ========================================
+// SISTEMA FINANCEIRO
+// ========================================
+
+model CashRegister {
+  id            Int      @id @default(autoincrement()) @map("caixa_id")
+  restaurant_id Int
+  opening_date  DateTime @default(now()) @map("data_abertura")
+  closing_date  DateTime? @map("data_fechamento")
+  initial_amount Decimal @default(0) @db.Decimal(10, 2) @map("valor_inicial")
+  final_amount  Decimal? @db.Decimal(10, 2) @map("valor_final")
+  notes         String?  @db.Text @map("observacoes")
+  status        String   @default("aberto") @db.VarChar(20) // aberto, fechado
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  revenues      Revenue[]
+  expenses      Expense[]
+
+  @@map("caixa")
+  @@index([restaurant_id])
+  @@index([restaurant_id, status])
+  @@index([restaurant_id, opening_date])
+}
+
+model FinancialCategory {
+  id            Int      @id @default(autoincrement()) @map("categoria_id")
+  restaurant_id Int
+  name          String   @db.VarChar(100) @map("nome")
+  type          String   @db.VarChar(20) @map("tipo") // receita, despesa
+  description   String?  @db.Text @map("descricao")
+  color         String?  @db.VarChar(7) @map("cor") // hex color
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  revenues      Revenue[]
+  expenses      Expense[]
+
+  @@unique([restaurant_id, name, type])
+  @@map("categorias_financeiras")
+  @@index([restaurant_id])
+  @@index([restaurant_id, type])
+}
+
+model Revenue {
+  id            Int      @id @default(autoincrement()) @map("receita_id")
+  restaurant_id Int
+  cash_register_id Int? @map("caixa_id")
+  category_id   Int? @map("categoria_id")
+  order_id      Int? @map("pedido_id")
+  description   String   @db.Text @map("descricao")
+  amount        Decimal  @db.Decimal(10, 2) @map("valor")
+  revenue_date  DateTime @default(now()) @map("data_receita")
+  payment_method String? @db.VarChar(50) @map("forma_pagamento")
+  notes         String?  @db.Text @map("observacoes")
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  cash_register CashRegister? @relation(fields: [cash_register_id], references: [id])
+  category      FinancialCategory? @relation(fields: [category_id], references: [id])
+  order         Order? @relation(fields: [order_id], references: [id])
+
+  @@map("receitas")
+  @@index([restaurant_id])
+  @@index([restaurant_id, revenue_date])
+  @@index([restaurant_id, category_id])
+  @@index([cash_register_id])
+  @@index([order_id])
+}
+
+model Expense {
+  id            Int      @id @default(autoincrement()) @map("despesa_id")
+  restaurant_id Int
+  cash_register_id Int? @map("caixa_id")
+  category_id   Int? @map("categoria_id")
+  description   String   @db.Text @map("descricao")
+  amount        Decimal  @db.Decimal(10, 2) @map("valor")
+  expense_date  DateTime @default(now()) @map("data_despesa")
+  payment_method String? @db.VarChar(50) @map("forma_pagamento")
+  supplier      String?  @db.VarChar(255) @map("fornecedor")
+  invoice_number String? @db.VarChar(100) @map("nota_fiscal")
+  notes         String?  @db.Text @map("observacoes")
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  cash_register CashRegister? @relation(fields: [cash_register_id], references: [id])
+  category      FinancialCategory? @relation(fields: [category_id], references: [id])
+
+  @@map("despesas")
+  @@index([restaurant_id])
+  @@index([restaurant_id, expense_date])
+  @@index([restaurant_id, category_id])
+  @@index([cash_register_id])
+}
+
+// ========================================
+// SISTEMA DE PEDIDOS
+// ========================================
+
+model Order {
+  id            Int      @id @default(autoincrement()) @map("pedido_id")
+  restaurant_id Int
+  order_number  String   @db.VarChar(50) @map("numero_pedido")
+  customer_name String?  @db.VarChar(255) @map("nome_cliente")
+  customer_phone String? @db.VarChar(20) @map("telefone_cliente")
+  table_number  String?  @db.VarChar(10) @map("numero_mesa")
+  status        String   @default("pendente") @db.VarChar(20) // pendente, preparando, pronto, entregue, cancelado
+  subtotal      Decimal  @db.Decimal(10, 2) @map("subtotal")
+  discount      Decimal  @default(0) @db.Decimal(10, 2) @map("desconto")
+  total         Decimal  @db.Decimal(10, 2) @map("total")
+  payment_method String? @db.VarChar(50) @map("forma_pagamento")
+  notes         String?  @db.Text @map("observacoes")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  items         OrderItem[]
+  revenues      Revenue[]
+
+  @@unique([restaurant_id, order_number])
+  @@map("pedidos")
+  @@index([restaurant_id])
+  @@index([restaurant_id, status])
+  @@index([restaurant_id, created_at])
+}
+
+model OrderItem {
+  id            Int      @id @default(autoincrement()) @map("item_pedido_id")
+  restaurant_id Int
+  order_id      Int      @map("pedido_id")
+  menu_item_id  Int      @map("item_cardapio_id")
+  quantity      Int      @map("quantidade")
+  unit_price    Decimal  @db.Decimal(10, 2) @map("preco_unitario")
+  total_price   Decimal  @db.Decimal(10, 2) @map("preco_total")
+  notes         String?  @db.Text @map("observacoes")
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  order         Order      @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id])
+
+  @@map("itens_pedido")
+  @@index([restaurant_id, order_id])
+  @@index([menu_item_id])
 }
 
 // ========================================

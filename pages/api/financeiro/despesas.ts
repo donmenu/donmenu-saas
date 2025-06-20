@@ -6,12 +6,13 @@ const prisma = new PrismaClient()
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      const despesas = await prisma.despesas.findMany({
+      const despesas = await prisma.expense.findMany({
         include: {
-          categoria: true
+          category: true,
+          cash_register: true
         },
         orderBy: {
-          data_despesa: 'desc'
+          expense_date: 'desc'
         }
       })
 
@@ -23,28 +24,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } else if (req.method === 'POST') {
     try {
       const { 
-        caixa_id, 
-        categoria_id, 
         descricao, 
         valor, 
         data_despesa, 
         forma_pagamento, 
         fornecedor, 
         nota_fiscal, 
-        observacoes 
+        observacoes, 
+        categoria_id, 
+        caixa_id 
       } = req.body
 
-      const novaDespesa = await prisma.despesas.create({
+      const novaDespesa = await prisma.expense.create({
         data: {
-          caixa_id: caixa_id ? parseInt(caixa_id) : null,
-          categoria_id: categoria_id ? parseInt(categoria_id) : null,
-          descricao,
-          valor,
-          data_despesa: new Date(data_despesa),
-          forma_pagamento,
-          fornecedor,
-          nota_fiscal,
-          observacoes
+          description: descricao,
+          amount: valor,
+          expense_date: data_despesa ? new Date(data_despesa) : new Date(),
+          payment_method: forma_pagamento,
+          supplier: fornecedor,
+          invoice_number: nota_fiscal,
+          notes: observacoes,
+          category_id: categoria_id ? parseInt(categoria_id) : null,
+          cash_register_id: caixa_id ? parseInt(caixa_id) : null,
+          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
         }
       })
 

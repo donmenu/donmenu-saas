@@ -7,13 +7,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       const { tipo } = req.query
-      
-      const where = tipo ? { tipo: tipo as string } : {}
-      
-      const categorias = await prisma.categorias_financeiras.findMany({
-        where,
+
+      const where = tipo ? { type: tipo as string } : {}
+
+      const categorias = await prisma.financialCategory.findMany({
+        where: {
+          ...where,
+          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
+        },
         orderBy: {
-          nome: 'asc'
+          name: 'asc'
         }
       })
 
@@ -26,12 +29,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { nome, tipo, descricao, cor } = req.body
 
-      const novaCategoria = await prisma.categorias_financeiras.create({
+      const novaCategoria = await prisma.financialCategory.create({
         data: {
-          nome,
-          tipo,
-          descricao,
-          cor
+          name: nome,
+          type: tipo,
+          description: descricao,
+          color: cor,
+          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
         }
       })
 

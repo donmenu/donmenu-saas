@@ -7,14 +7,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       // Buscar todos os caixas
-      const caixas = await prisma.caixa.findMany({
+      const caixas = await prisma.cashRegister.findMany({
         orderBy: {
           created_at: 'desc'
         }
       })
 
       // Buscar caixa atual (aberto)
-      const caixaAtual = await prisma.caixa.findFirst({
+      const caixaAtual = await prisma.cashRegister.findFirst({
         where: {
           status: 'aberto'
         }
@@ -24,21 +24,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       if (caixaAtual) {
         // Calcular totais do caixa atual
-        const receitas = await prisma.receitas.findMany({
+        const receitas = await prisma.revenue.findMany({
           where: {
-            caixa_id: caixaAtual.caixa_id
+            cash_register_id: caixaAtual.id
           }
         })
 
-        const despesas = await prisma.despesas.findMany({
+        const despesas = await prisma.expense.findMany({
           where: {
-            caixa_id: caixaAtual.caixa_id
+            cash_register_id: caixaAtual.id
           }
         })
 
-        const totalReceitas = receitas.reduce((sum, r) => sum + Number(r.valor), 0)
-        const totalDespesas = despesas.reduce((sum, d) => sum + Number(d.valor), 0)
-        const saldo = Number(caixaAtual.valor_inicial) + totalReceitas - totalDespesas
+        const totalReceitas = receitas.reduce((sum, r) => sum + Number(r.amount), 0)
+        const totalDespesas = despesas.reduce((sum, d) => sum + Number(d.amount), 0)
+        const saldo = Number(caixaAtual.initial_amount) + totalReceitas - totalDespesas
 
         caixaAtualDetalhes = {
           caixa: caixaAtual,
@@ -61,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { valor_inicial, observacoes } = req.body
 
       // Verificar se já existe um caixa aberto
-      const caixaAberto = await prisma.caixa.findFirst({
+      const caixaAberto = await prisma.cashRegister.findFirst({
         where: {
           status: 'aberto'
         }
@@ -72,11 +72,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Criar novo caixa
-      const novoCaixa = await prisma.caixa.create({
+      const novoCaixa = await prisma.cashRegister.create({
         data: {
-          valor_inicial,
-          observacoes,
-          status: 'aberto'
+          initial_amount: valor_inicial,
+          notes: observacoes,
+          status: 'aberto',
+          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
         }
       })
 
@@ -90,14 +91,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { caixa_id, valor_final, observacoes } = req.body
 
       // Fechar caixa
-      const caixaFechado = await prisma.caixa.update({
+      const caixaFechado = await prisma.cashRegister.update({
         where: {
-          caixa_id: parseInt(caixa_id)
+          id: parseInt(caixa_id)
         },
         data: {
-          data_fechamento: new Date(),
-          valor_final,
-          observacoes,
+          closing_date: new Date(),
+          final_amount: valor_final,
+          notes: observacoes,
           status: 'fechado'
         }
       })
