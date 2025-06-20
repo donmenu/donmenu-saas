@@ -172,7 +172,7 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
                   </TableCell>
                   <TableCell className="text-right">
                     <Text className={`font-semibold ${getProfitColor(profit)}`}>
-                      {formatCurrency(profit?.toString())}
+                      {formatCurrency(profit ? profit.toFixed(2) : null)}
                     </Text>
                   </TableCell>
                   <TableCell className="text-right">
