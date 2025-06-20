@@ -1,8 +1,31 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import { useState } from 'react'
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: false
+    })
+    setLoading(false)
+    if (res?.error) {
+      setError(res.error)
+    } else if (res?.ok) {
+      window.location.href = '/dashboard'
+    }
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50 px-4">
       <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
@@ -53,6 +76,34 @@ export default function LoginPage() {
             <span className="px-2 bg-white text-gray-500">ou</span>
           </div>
         </div>
+
+        {/* Login por Email/Senha */}
+        <form className="space-y-4 mb-4" onSubmit={handleSubmit}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            required
+          />
+          {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-60"
+            disabled={loading}
+          >
+            {loading ? 'Entrando...' : 'Entrar com Email e Senha'}
+          </button>
+        </form>
 
         {/* Demo Login */}
         <div className="text-center">

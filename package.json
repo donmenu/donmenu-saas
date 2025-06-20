@@ -6,10 +6,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "setup-db": "node scripts/setup-database.js",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "db:migrate": "prisma migrate dev",
+    "db:reset": "prisma migrate reset",
     "check-auth": "node scripts/check-auth.js"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.12",
@@ -19,11 +24,14 @@
     "@supabase/supabase-js": "^2.50.0",
     "@tailwindcss/forms": "^0.5.3",
     "@tremor/react": "^2.0.1",
+    "@types/bcryptjs": "^2.4.6",
     "@types/js-cookie": "^3.0.3",
     "@types/react-dom": "18.0.11",
     "@vercel/analytics": "^0.1.10",
     "autoprefixer": "^10.4.13",
+    "bcryptjs": "^3.0.2",
     "bufferutil": "^4.0.9",
+    "dotenv": "^16.5.0",
     "eslint": "8.35.0",
     "eslint-config-next": "13.2.1",
     "js-cookie": "^3.0.1",

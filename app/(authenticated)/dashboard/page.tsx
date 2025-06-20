@@ -88,10 +88,10 @@ export default function PlaygroundPage() {
 
   if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Carregando...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">Carregando...</p>
         </div>
       </div>
     )
@@ -107,17 +107,17 @@ export default function PlaygroundPage() {
       <div className="mb-8">
         <Grid className="gap-6" numColsSm={2} numColsLg={3}>
           {categories.map((item) => (
-            <Card key={item.title}>
+            <Card key={item.title} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
               <Flex alignItems="start">
-                <Text>{item.title}</Text>
+                <Text className="text-gray-600 dark:text-gray-300">{item.title}</Text>
               </Flex>
               <Flex
                 className="space-x-3 truncate"
                 justifyContent="start"
                 alignItems="baseline"
               >
-                <Metric>{item.metric}</Metric>
-                <Text className="truncate">from {item.metricPrev}</Text>
+                <Metric className="text-gray-900 dark:text-white">{item.metric}</Metric>
+                <Text className="truncate text-gray-500 dark:text-gray-400">from {item.metricPrev}</Text>
               </Flex>
             </Card>
           ))}
@@ -125,19 +125,19 @@ export default function PlaygroundPage() {
       </div>
       <Grid className="mt-8 gap-6" numColsSm={2} numColsLg={3}>
         {data.map((item) => (
-          <Card key={item.category}>
-            <Title>{item.category}</Title>
+          <Card key={item.category} className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+            <Title className="text-gray-900 dark:text-white">{item.category}</Title>
             <Flex
               className="space-x-2"
               justifyContent="start"
               alignItems="baseline"
             >
-              <Metric>{item.stat}</Metric>
-              <Text>Total views</Text>
+              <Metric className="text-gray-900 dark:text-white">{item.stat}</Metric>
+              <Text className="text-gray-500 dark:text-gray-400">Total views</Text>
             </Flex>
             <Flex className="mt-6">
-              <Text>Pages</Text>
-              <Text className="text-right">Views</Text>
+              <Text className="text-gray-600 dark:text-gray-300">Pages</Text>
+              <Text className="text-right text-gray-600 dark:text-gray-300">Views</Text>
             </Flex>
             <BarList
               className="mt-2"

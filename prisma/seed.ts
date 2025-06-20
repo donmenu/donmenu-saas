@@ -5,143 +5,376 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
 
-  // Criar categorias financeiras para receitas
-  const categoriasReceitas = [
-    { nome: 'Vendas de Alimentos', tipo: 'receita', descricao: 'Receitas provenientes da venda de alimentos' },
-    { nome: 'Vendas de Bebidas', tipo: 'receita', descricao: 'Receitas provenientes da venda de bebidas' },
-    { nome: 'Delivery', tipo: 'receita', descricao: 'Receitas de pedidos delivery' },
-    { nome: 'Eventos', tipo: 'receita', descricao: 'Receitas de eventos e festas' },
-    { nome: 'Outros', tipo: 'receita', descricao: 'Outras receitas' },
-  ]
-
-  // Criar categorias financeiras para despesas
-  const categoriasDespesas = [
-    { nome: 'Insumos e Ingredientes', tipo: 'despesa', descricao: 'Compra de ingredientes e insumos' },
-    { nome: 'Funcionários', tipo: 'despesa', descricao: 'Salários e benefícios de funcionários' },
-    { nome: 'Aluguel', tipo: 'despesa', descricao: 'Aluguel do estabelecimento' },
-    { nome: 'Contas Públicas', tipo: 'despesa', descricao: 'Água, luz, gás, internet' },
-    { nome: 'Manutenção', tipo: 'despesa', descricao: 'Manutenção de equipamentos' },
-    { nome: 'Marketing', tipo: 'despesa', descricao: 'Publicidade e marketing' },
-    { nome: 'Impostos', tipo: 'despesa', descricao: 'Impostos e taxas' },
-    { nome: 'Outros', tipo: 'despesa', descricao: 'Outras despesas' },
-  ]
-
-  console.log('📊 Criando categorias financeiras...')
-  for (const categoria of [...categoriasReceitas, ...categoriasDespesas]) {
-    try {
-      await prisma.categorias_financeiras.create({
-        data: categoria,
-      })
-      console.log(`✅ Categoria criada: ${categoria.nome}`)
-    } catch (error) {
-      console.log(`⚠️ Categoria já existe: ${categoria.nome}`)
+  // Criar restaurante de exemplo
+  console.log('🏪 Criando restaurante de exemplo...')
+  const restaurant = await prisma.restaurant.create({
+    data: {
+      name: 'Restaurante Exemplo',
+      cnpj: '12.345.678/0001-90',
+      email: 'contato@restauranteexemplo.com',
+      phone: '(11) 99999-9999',
+      address: 'Rua das Flores, 123',
+      city: 'São Paulo',
+      state: 'SP',
+      zip_code: '01234-567',
+      logo_url: 'https://via.placeholder.com/150x150',
+      active: true,
+      plan_type: 'premium'
     }
-  }
-
-  // Criar um caixa aberto de exemplo
-  console.log('💰 Criando caixa inicial...')
-  const caixaAberto = await prisma.caixa.findFirst({
-    where: { status: 'aberto' }
   })
+  console.log(`✅ Restaurante criado: ${restaurant.name}`)
 
-  if (!caixaAberto) {
-    await prisma.caixa.create({
+  // Criar usuário administrador
+  console.log('👤 Criando usuário administrador...')
+  const adminUser = await prisma.user.create({
+    data: {
+      restaurant_id: restaurant.id,
+      name: 'Administrador',
+      email: 'admin@restauranteexemplo.com',
+      password: '$2b$10$example.hash', // Senha: admin123
+      role: 'owner',
+      avatar_url: 'https://via.placeholder.com/100x100',
+      active: true
+    }
+  })
+  console.log(`✅ Usuário criado: ${adminUser.name}`)
+
+  // Criar categorias
+  console.log('📂 Criando categorias...')
+  const categories = [
+    { name: 'Entradas', description: 'Pratos de entrada', color: '#FF6B6B', icon: '🍽️' },
+    { name: 'Pratos Principais', description: 'Pratos principais', color: '#4ECDC4', icon: '🍖' },
+    { name: 'Sobremesas', description: 'Sobremesas e doces', color: '#45B7D1', icon: '🍰' },
+    { name: 'Bebidas', description: 'Bebidas e refrigerantes', color: '#96CEB4', icon: '🥤' },
+    { name: 'Acompanhamentos', description: 'Acompanhamentos', color: '#FFEAA7', icon: '🥔' }
+  ]
+
+  const createdCategories: any[] = []
+  for (const category of categories) {
+    const created = await prisma.category.create({
       data: {
-        valor_inicial: 100.00,
-        status: 'aberto',
-        observacoes: 'Caixa inicial do sistema'
+        restaurant_id: restaurant.id,
+        ...category,
+        sort_order: createdCategories.length
       }
     })
-    console.log('✅ Caixa inicial criado')
-  } else {
-    console.log('⚠️ Caixa já existe')
+    createdCategories.push(created)
+    console.log(`✅ Categoria criada: ${created.name}`)
   }
 
-  // Criar algumas receitas de exemplo
-  console.log('📈 Criando receitas de exemplo...')
-  const receitasExemplo = [
+  // Criar ingredientes
+  console.log('🥕 Criando ingredientes...')
+  const ingredients = [
+    { name: 'Carne Bovina', description: 'Carne bovina moída', unit: 'kg', cost_per_unit: 25.00, supplier: 'Frigorífico Silva', min_stock: 5.0, current_stock: 10.0 },
+    { name: 'Pão de Hambúrguer', description: 'Pão especial para hambúrguer', unit: 'un', cost_per_unit: 1.50, supplier: 'Padaria Central', min_stock: 50, current_stock: 100 },
+    { name: 'Queijo Cheddar', description: 'Queijo cheddar fatiado', unit: 'kg', cost_per_unit: 35.00, supplier: 'Laticínios Santos', min_stock: 2.0, current_stock: 5.0 },
+    { name: 'Alface', description: 'Alface americana', unit: 'un', cost_per_unit: 2.00, supplier: 'Hortifruti Verde', min_stock: 20, current_stock: 30 },
+    { name: 'Tomate', description: 'Tomate vermelho', unit: 'kg', cost_per_unit: 8.00, supplier: 'Hortifruti Verde', min_stock: 3.0, current_stock: 5.0 },
+    { name: 'Batata', description: 'Batata inglesa', unit: 'kg', cost_per_unit: 6.00, supplier: 'Hortifruti Verde', min_stock: 10.0, current_stock: 15.0 },
+    { name: 'Óleo de Soja', description: 'Óleo de soja refinado', unit: 'l', cost_per_unit: 12.00, supplier: 'Distribuidora ABC', min_stock: 5.0, current_stock: 8.0 },
+    { name: 'Farinha de Trigo', description: 'Farinha de trigo especial', unit: 'kg', cost_per_unit: 4.50, supplier: 'Moinho Central', min_stock: 20.0, current_stock: 25.0 },
+    { name: 'Ovos', description: 'Ovos de galinha', unit: 'dz', cost_per_unit: 15.00, supplier: 'Granja Feliz', min_stock: 10, current_stock: 15 },
+    { name: 'Leite', description: 'Leite integral', unit: 'l', cost_per_unit: 5.00, supplier: 'Laticínios Santos', min_stock: 10.0, current_stock: 15.0 }
+  ]
+
+  const createdIngredients: any[] = []
+  for (const ingredient of ingredients) {
+    const created = await prisma.ingredient.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...ingredient
+      }
+    })
+    createdIngredients.push(created)
+    console.log(`✅ Ingrediente criado: ${created.name}`)
+  }
+
+  // Criar receitas (fichas técnicas)
+  console.log('🍳 Criando receitas...')
+  const recipes = [
     {
-      descricao: 'Venda de X-Burger',
-      valor: 25.90,
-      forma_pagamento: 'dinheiro',
-      observacoes: 'Venda realizada na mesa 1'
+      name: 'X-Burger Clássico',
+      description: 'Hambúrguer clássico com queijo e salada',
+      category_id: createdCategories[1].id, // Pratos Principais
+      yield_quantity: 1,
+      yield_unit: 'un',
+      preparation_time: 15,
+      difficulty: 'fácil',
+      instructions: '1. Grelhar a carne\n2. Montar o hambúrguer\n3. Adicionar queijo e salada',
+      image_url: 'https://via.placeholder.com/300x200',
+      ingredients: [
+        { ingredient_id: 0, quantity: 0.15, unit: 'kg' }, // Carne
+        { ingredient_id: 1, quantity: 1, unit: 'un' }, // Pão
+        { ingredient_id: 2, quantity: 0.03, unit: 'kg' }, // Queijo
+        { ingredient_id: 3, quantity: 0.5, unit: 'un' }, // Alface
+        { ingredient_id: 4, quantity: 0.05, unit: 'kg' } // Tomate
+      ]
     },
     {
-      descricao: 'Venda de Batata Frita',
-      valor: 12.90,
-      forma_pagamento: 'cartao',
-      observacoes: 'Venda realizada na mesa 2'
+      name: 'Batata Frita',
+      description: 'Batatas fritas crocantes',
+      category_id: createdCategories[4].id, // Acompanhamentos
+      yield_quantity: 1,
+      yield_unit: 'porção',
+      preparation_time: 20,
+      difficulty: 'fácil',
+      instructions: '1. Cortar batatas\n2. Fritar em óleo quente\n3. Salgar a gosto',
+      image_url: 'https://via.placeholder.com/300x200',
+      ingredients: [
+        { ingredient_id: 5, quantity: 0.2, unit: 'kg' }, // Batata
+        { ingredient_id: 6, quantity: 0.1, unit: 'l' } // Óleo
+      ]
     },
     {
-      descricao: 'Delivery - X-Burger',
-      valor: 30.90,
-      forma_pagamento: 'pix',
-      observacoes: 'Pedido delivery - taxa de entrega incluída'
+      name: 'Bolo de Chocolate',
+      description: 'Bolo de chocolate caseiro',
+      category_id: createdCategories[2].id, // Sobremesas
+      yield_quantity: 1,
+      yield_unit: 'un',
+      preparation_time: 60,
+      difficulty: 'médio',
+      instructions: '1. Misturar ingredientes\n2. Assar por 40 minutos\n3. Deixar esfriar',
+      image_url: 'https://via.placeholder.com/300x200',
+      ingredients: [
+        { ingredient_id: 7, quantity: 0.3, unit: 'kg' }, // Farinha
+        { ingredient_id: 8, quantity: 2, unit: 'un' }, // Ovos
+        { ingredient_id: 9, quantity: 0.5, unit: 'l' } // Leite
+      ]
     }
   ]
 
-  for (const receita of receitasExemplo) {
-    try {
-      await prisma.receitas.create({
+  const createdRecipes: any[] = []
+  for (const recipe of recipes) {
+    const { ingredients: recipeIngredients, ...recipeData } = recipe
+    const created = await prisma.recipe.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...recipeData
+      }
+    })
+    createdRecipes.push(created)
+
+    // Criar ingredientes da receita
+    for (const ingredient of recipeIngredients) {
+      await prisma.recipeIngredient.create({
         data: {
-          ...receita,
-          data_receita: new Date()
+          restaurant_id: restaurant.id,
+          recipe_id: created.id,
+          ingredient_id: createdIngredients[ingredient.ingredient_id].id,
+          quantity: ingredient.quantity,
+          unit: ingredient.unit
         }
       })
-      console.log(`✅ Receita criada: ${receita.descricao}`)
-    } catch (error) {
-      console.log(`⚠️ Erro ao criar receita: ${receita.descricao}`)
     }
+    console.log(`✅ Receita criada: ${created.name}`)
   }
 
-  // Criar algumas despesas de exemplo
-  console.log('📉 Criando despesas de exemplo...')
-  const despesasExemplo = [
+  // Criar cardápios
+  console.log('📋 Criando cardápios...')
+  const menus = [
+    { name: 'Cardápio Principal', description: 'Cardápio completo do restaurante', type: 'principal', sort_order: 1 },
+    { name: 'Cardápio Delivery', description: 'Especial para delivery', type: 'delivery', sort_order: 2 },
+    { name: 'Cardápio Sobremesas', description: 'Apenas sobremesas', type: 'sobremesas', sort_order: 3 }
+  ]
+
+  const createdMenus: any[] = []
+  for (const menu of menus) {
+    const created = await prisma.menu.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...menu
+      }
+    })
+    createdMenus.push(created)
+    console.log(`✅ Cardápio criado: ${created.name}`)
+  }
+
+  // Criar itens do cardápio
+  console.log('🍽️ Criando itens do cardápio...')
+  const menuItems = [
     {
-      descricao: 'Compra de Carne Bovina',
-      valor: 150.00,
-      forma_pagamento: 'dinheiro',
-      fornecedor: 'Frigorífico Silva',
-      nota_fiscal: 'NF001/2024',
-      observacoes: 'Compra de 6kg de carne bovina'
+      menu_id: createdMenus[0].id, // Cardápio Principal
+      recipe_id: createdRecipes[0].id, // X-Burger
+      category_id: createdCategories[1].id, // Pratos Principais
+      name: 'X-Burger Clássico',
+      description: 'Hambúrguer com queijo, alface e tomate',
+      price: 25.90,
+      desired_margin: 60.0,
+      manual_pricing: false,
+      image_url: 'https://via.placeholder.com/300x200',
+      sort_order: 1
     },
     {
-      descricao: 'Conta de Luz',
-      valor: 89.50,
-      forma_pagamento: 'boleto',
-      fornecedor: 'Companhia de Energia',
-      nota_fiscal: 'FAT001/2024',
-      observacoes: 'Conta de luz do mês'
+      menu_id: createdMenus[0].id, // Cardápio Principal
+      recipe_id: createdRecipes[1].id, // Batata Frita
+      category_id: createdCategories[4].id, // Acompanhamentos
+      name: 'Batata Frita',
+      description: 'Porção de batatas fritas crocantes',
+      price: 12.90,
+      desired_margin: 70.0,
+      manual_pricing: false,
+      image_url: 'https://via.placeholder.com/300x200',
+      sort_order: 2
     },
     {
-      descricao: 'Manutenção do Freezer',
-      valor: 200.00,
-      forma_pagamento: 'pix',
-      fornecedor: 'Técnico João',
-      observacoes: 'Manutenção preventiva do freezer'
+      menu_id: createdMenus[2].id, // Cardápio Sobremesas
+      recipe_id: createdRecipes[2].id, // Bolo de Chocolate
+      category_id: createdCategories[2].id, // Sobremesas
+      name: 'Bolo de Chocolate',
+      description: 'Bolo de chocolate caseiro',
+      price: 18.90,
+      desired_margin: 65.0,
+      manual_pricing: false,
+      image_url: 'https://via.placeholder.com/300x200',
+      sort_order: 1
     }
   ]
 
-  for (const despesa of despesasExemplo) {
-    try {
-      await prisma.despesas.create({
-        data: {
-          ...despesa,
-          data_despesa: new Date()
-        }
-      })
-      console.log(`✅ Despesa criada: ${despesa.descricao}`)
-    } catch (error) {
-      console.log(`⚠️ Erro ao criar despesa: ${despesa.descricao}`)
+  const createdMenuItems: any[] = []
+  for (const item of menuItems) {
+    const created = await prisma.menuItem.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...item
+      }
+    })
+    createdMenuItems.push(created)
+    console.log(`✅ Item criado: ${created.name}`)
+  }
+
+  // Criar combos
+  console.log('🎁 Criando combos...')
+  const combos = [
+    {
+      name: 'Combo X-Burger + Batata',
+      description: 'X-Burger com batata frita e refrigerante',
+      price: 32.90,
+      discount: 15.0,
+      image_url: 'https://via.placeholder.com/300x200'
     }
+  ]
+
+  const createdCombos: any[] = []
+  for (const combo of combos) {
+    const created = await prisma.combo.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...combo
+      }
+    })
+    createdCombos.push(created)
+    console.log(`✅ Combo criado: ${created.name}`)
+  }
+
+  // Criar itens dos combos
+  console.log('📦 Criando itens dos combos...')
+  const comboItems = [
+    {
+      combo_id: createdCombos[0].id,
+      menu_item_id: createdMenuItems[0].id, // X-Burger
+      quantity: 1,
+      discount: 10.0
+    },
+    {
+      combo_id: createdCombos[0].id,
+      menu_item_id: createdMenuItems[1].id, // Batata Frita
+      quantity: 1,
+      discount: 5.0
+    }
+  ]
+
+  for (const item of comboItems) {
+    await prisma.comboItem.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...item
+      }
+    })
+    console.log(`✅ Item do combo criado`)
+  }
+
+  // Criar algumas vendas de exemplo
+  console.log('💰 Criando vendas de exemplo...')
+  const sales = [
+    {
+      sale_number: 'V001',
+      customer_name: 'João Silva',
+      customer_phone: '(11) 99999-1111',
+      subtotal: 38.80,
+      discount: 5.90,
+      total: 32.90,
+      payment_method: 'cartão',
+      status: 'completed'
+    },
+    {
+      sale_number: 'V002',
+      customer_name: 'Maria Santos',
+      customer_phone: '(11) 99999-2222',
+      subtotal: 25.90,
+      discount: 0,
+      total: 25.90,
+      payment_method: 'pix',
+      status: 'completed'
+    }
+  ]
+
+  const createdSales: any[] = []
+  for (const sale of sales) {
+    const created = await prisma.sale.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...sale
+      }
+    })
+    createdSales.push(created)
+    console.log(`✅ Venda criada: ${created.sale_number}`)
+  }
+
+  // Criar itens das vendas
+  console.log('🛒 Criando itens das vendas...')
+  const saleItems = [
+    {
+      sale_id: createdSales[0].id,
+      menu_item_id: createdMenuItems[0].id, // X-Burger (obrigatório)
+      combo_id: createdCombos[0].id, // Combo (opcional)
+      quantity: 1,
+      unit_price: 32.90,
+      total_price: 32.90
+    },
+    {
+      sale_id: createdSales[1].id,
+      menu_item_id: createdMenuItems[0].id, // X-Burger
+      quantity: 1,
+      unit_price: 25.90,
+      total_price: 25.90
+    }
+  ]
+
+  for (const item of saleItems) {
+    await prisma.saleItem.create({
+      data: {
+        restaurant_id: restaurant.id,
+        ...item
+      }
+    })
+    console.log(`✅ Item da venda criado`)
   }
 
   console.log('✅ Seed concluído com sucesso!')
   console.log('📊 Dados criados:')
-  console.log(`   - ${categoriasReceitas.length + categoriasDespesas.length} categorias financeiras`)
-  console.log(`   - 1 caixa inicial`)
-  console.log(`   - ${receitasExemplo.length} receitas de exemplo`)
-  console.log(`   - ${despesasExemplo.length} despesas de exemplo`)
+  console.log(`   - 1 restaurante`)
+  console.log(`   - 1 usuário administrador`)
+  console.log(`   - ${categories.length} categorias`)
+  console.log(`   - ${ingredients.length} ingredientes`)
+  console.log(`   - ${recipes.length} receitas`)
+  console.log(`   - ${menus.length} cardápios`)
+  console.log(`   - ${createdMenuItems.length} itens do cardápio`)
+  console.log(`   - ${combos.length} combos`)
+  console.log(`   - ${sales.length} vendas`)
+  console.log('')
+  console.log('🔑 Credenciais de acesso:')
+  console.log(`   Email: admin@restauranteexemplo.com`)
+  console.log(`   Senha: admin123`)
 }
 
 main()

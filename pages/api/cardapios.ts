@@ -9,12 +9,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { search } = req.query
       const searchTerm = search ? String(search) : ''
 
-      const cardapios = await prisma.cardapios.findMany({
+      const cardapios = await prisma.menuItem.findMany({
         where: {
-          item: {
+          name: {
             contains: searchTerm,
             mode: 'insensitive'
           }
+        },
+        include: {
+          category: true,
+          menu: true
         },
         orderBy: {
           id: 'desc'

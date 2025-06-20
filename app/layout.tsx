@@ -6,6 +6,7 @@ import Toast from './toast'
 import Footer from './footer'
 import { Suspense } from 'react'
 import SessionProviderWrapper from './session-provider'
+import { ThemeProvider } from '../lib/contexts/ThemeContext'
 
 export const metadata = {
   title: 'Don Menu',
@@ -20,17 +21,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" className="h-full bg-gray-50">
-      <body className="h-full">
-        <SessionProviderWrapper>
-          <Suspense fallback="...">
-            <Nav />
-          </Suspense>
-          {children}
-          <AnalyticsWrapper />
-          {/*<Toast />*/}
-          <Footer />
-        </SessionProviderWrapper>
+    <html lang="pt-BR" className="h-full">
+      <body className="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+        <ThemeProvider>
+          <SessionProviderWrapper>
+            <Suspense fallback="...">
+              <Nav />
+            </Suspense>
+            {children}
+            <AnalyticsWrapper />
+            {/*<Toast />*/}
+            <Footer />
+          </SessionProviderWrapper>
+        </ThemeProvider>
       </body>
     </html>
   )

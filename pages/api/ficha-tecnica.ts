@@ -1,47 +1,41 @@
-import { NextApiRequest, NextApiResponse } from 'next'
-import { PrismaClient } from '@prisma/client'
+import { NextApiRequest, NextApiResponse } from "next"
+import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'GET') {
+  if (req.method === "GET") {
     try {
       const { search } = req.query
-      const searchTerm = search ? String(search) : ''
+      const searchTerm = search ? String(search) : ""
 
-      const fichasTecnicas = await prisma.fichas_tecnicas.findMany({
+      const fichasTecnicas = await prisma.recipe.findMany({
         where: {
-          item: {
-            name: {
-              contains: searchTerm,
-              mode: 'insensitive'
-            }
+          name: {
+            contains: searchTerm,
+            mode: "insensitive"
           }
         },
         include: {
-          item: {
-            include: {
-              category: true
-            }
-          },
-          ficha_ingredientes: {
+          category: true,
+          ingredients: {
             include: {
               ingredient: true
             }
           }
         },
         orderBy: {
-          created_at: 'desc'
+          created_at: "desc"
         }
       })
 
       res.status(200).json(fichasTecnicas)
     } catch (error) {
-      console.error('Erro ao buscar fichas técnicas:', error)
-      res.status(500).json({ error: 'Erro interno do servidor' })
+      console.error("Erro ao buscar fichas técnicas:", error)
+      res.status(500).json({ error: "Erro interno do servidor" })
     }
   } else {
-    res.setHeader('Allow', ['GET'])
+    res.setHeader("Allow", ["GET"])
     res.status(405).end(`Method ${req.method} Not Allowed`)
   }
-} 
+}

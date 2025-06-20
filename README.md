@@ -1,9 +1,18 @@
 # Don Menu - Sistema de Gestão para Restaurantes
 
 <div align="center">
-  <img src="/public/images/logo.svg" alt="Don Menu Logo" width="120" height="120">
-  <h1>Don Menu</h1>
-  <p><strong>Sistema completo de gestão para pequenos restaurantes e empreendedores da gastronomia</strong></p>
+  <img src="/public/images/logo.png" alt="Don Menu Logo" width="120" height="120">
+  <h1 align="center">Don Menu</h1>
+  <p align="center">
+    O sistema completo para gestão de restaurantes, do cardápio digital à ficha técnica.
+    <br />
+    <a href="https://donmenu.com.br/docs"><strong>Explore a documentação »</strong></a>
+    <br />
+    <br />
+    <a href="https://donmenu.com.br/bug-report">Reportar Bug</a>
+    ·
+    <a href="https://donmenu.com.br/request-feature">Sugerir Funcionalidade</a>
+  </p>
   
   [![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)

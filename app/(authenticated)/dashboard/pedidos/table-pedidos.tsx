@@ -17,30 +17,40 @@ import { EyeIcon, CheckIcon, XMarkIcon, ClockIcon } from '@heroicons/react/24/ou
 
 interface PedidoItem {
   id: number
-  pedido_id: number
-  item_id: number
-  quantidade: number
-  preco_unit: number
-  observacoes?: string
+  restaurant_id: number
+  sale_id: number
+  menu_item_id: number
+  combo_id: number | null
+  quantity: number
+  unit_price: string
+  total_price: string
+  cost_price: string | null
+  gross_profit: string | null
+  margin: string | null
   created_at: string
-  item: {
-    item_id: number
+  menu_item: {
+    id: number
     name: string
-    description: string
-    price: number
+    description: string | null
+    price: string
   }
 }
 
 interface Pedido {
-  pedido_id: number
-  mesa: string
-  cliente_nome: string
+  id: number
+  restaurant_id: number
+  sale_number: string
+  customer_name: string | null
+  customer_phone: string | null
+  subtotal: string
+  discount: string
+  total: string
+  payment_method: string
   status: string
-  total: number
-  observacoes?: string
+  notes: string | null
   created_at: string
   updated_at: string
-  pedido_itens: PedidoItem[]
+  items: PedidoItem[]
 }
 
 interface PedidosTableProps {
@@ -88,11 +98,11 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
     }
   }
 
-  const formatCurrency = (value: number) => {
+  const formatCurrency = (value: string) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value)
+    }).format(parseFloat(value))
   }
 
   const formatDateTime = (dateString: string) => {
@@ -107,40 +117,40 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pendente': return 'yellow'
-      case 'preparando': return 'blue'
-      case 'pronto': return 'green'
-      case 'entregue': return 'gray'
-      case 'cancelado': return 'red'
+      case 'pending': return 'yellow'
+      case 'preparing': return 'blue'
+      case 'ready': return 'green'
+      case 'completed': return 'gray'
+      case 'cancelled': return 'red'
       default: return 'gray'
     }
   }
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'pendente': return 'Pendente'
-      case 'preparando': return 'Preparando'
-      case 'pronto': return 'Pronto'
-      case 'entregue': return 'Entregue'
-      case 'cancelado': return 'Cancelado'
+      case 'pending': return 'Pendente'
+      case 'preparing': return 'Preparando'
+      case 'ready': return 'Pronto'
+      case 'completed': return 'Entregue'
+      case 'cancelled': return 'Cancelado'
       default: return status
     }
   }
 
   const getNextStatus = (currentStatus: string) => {
     switch (currentStatus) {
-      case 'pendente': return 'preparando'
-      case 'preparando': return 'pronto'
-      case 'pronto': return 'entregue'
+      case 'pending': return 'preparing'
+      case 'preparing': return 'ready'
+      case 'ready': return 'completed'
       default: return currentStatus
     }
   }
 
   const getNextStatusText = (currentStatus: string) => {
     switch (currentStatus) {
-      case 'pendente': return 'Iniciar Preparo'
-      case 'preparando': return 'Marcar Pronto'
-      case 'pronto': return 'Marcar Entregue'
+      case 'pending': return 'Iniciar Preparo'
+      case 'preparing': return 'Marcar Pronto'
+      case 'ready': return 'Marcar Entregue'
       default: return 'Atualizar'
     }
   }
@@ -151,8 +161,8 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
         <TableHead>
           <TableRow>
             <TableHeaderCell>Pedido #</TableHeaderCell>
-            <TableHeaderCell>Mesa</TableHeaderCell>
             <TableHeaderCell>Cliente</TableHeaderCell>
+            <TableHeaderCell>Telefone</TableHeaderCell>
             <TableHeaderCell>Itens</TableHeaderCell>
             <TableHeaderCell>Total</TableHeaderCell>
             <TableHeaderCell>Status</TableHeaderCell>
@@ -163,26 +173,26 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
         <TableBody>
           {pedidos.map((pedido) => {
             const nextStatus = getNextStatus(pedido.status)
-            const canUpdateStatus = ['pendente', 'preparando', 'pronto'].includes(pedido.status)
+            const canUpdateStatus = ['pending', 'preparing', 'ready'].includes(pedido.status)
             
             return (
-              <TableRow key={pedido.pedido_id}>
+              <TableRow key={pedido.id}>
                 <TableCell>
-                  <Text className="font-medium">#{pedido.pedido_id}</Text>
+                  <Text className="font-medium">#{pedido.sale_number}</Text>
                 </TableCell>
                 <TableCell>
-                  <Text className="font-medium">{pedido.mesa}</Text>
+                  <Text className="font-medium">{pedido.customer_name || 'N/A'}</Text>
                 </TableCell>
                 <TableCell>
-                  <Text className="font-medium">{pedido.cliente_nome}</Text>
+                  <Text className="font-medium">{pedido.customer_phone || 'N/A'}</Text>
                 </TableCell>
                 <TableCell>
-                  <Text className="text-sm text-gray-600">
-                    {pedido.pedido_itens.length} item(s)
+                  <Text className="text-sm text-gray-600 dark:text-gray-400">
+                    {pedido.items.length} item(s)
                   </Text>
                 </TableCell>
                 <TableCell>
-                  <Text className="font-semibold text-green-600">
+                  <Text className="font-semibold text-green-600 dark:text-green-400">
                     {formatCurrency(pedido.total)}
                   </Text>
                 </TableCell>
@@ -192,7 +202,7 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <Text className="text-sm text-gray-500">
+                  <Text className="text-sm text-gray-500 dark:text-gray-400">
                     {formatDateTime(pedido.created_at)}
                   </Text>
                 </TableCell>
@@ -202,34 +212,23 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
                       size="xs"
                       variant="secondary"
                       onClick={() => handleView(pedido)}
-                      icon={EyeIcon}
+                      className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/40 border-0"
                     >
-                      Ver
+                      <EyeIcon className="w-4 h-4" />
                     </Button>
-                    
                     {canUpdateStatus && (
                       <Button
                         size="xs"
                         variant="secondary"
-                        onClick={() => updateStatus(pedido.pedido_id, nextStatus)}
-                        loading={updatingStatus === pedido.pedido_id}
-                        disabled={updatingStatus === pedido.pedido_id}
+                        onClick={() => updateStatus(pedido.id, nextStatus)}
+                        disabled={updatingStatus === pedido.id}
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/40 border-0"
                       >
-                        {getNextStatusText(pedido.status)}
-                      </Button>
-                    )}
-                    
-                    {pedido.status === 'pendente' && (
-                      <Button
-                        size="xs"
-                        variant="secondary"
-                        color="red"
-                        onClick={() => updateStatus(pedido.pedido_id, 'cancelado')}
-                        loading={updatingStatus === pedido.pedido_id}
-                        disabled={updatingStatus === pedido.pedido_id}
-                        icon={XMarkIcon}
-                      >
-                        Cancelar
+                        {updatingStatus === pedido.id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+                        ) : (
+                          <CheckIcon className="w-4 h-4" />
+                        )}
                       </Button>
                     )}
                   </div>
@@ -240,64 +239,69 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
         </TableBody>
       </Table>
 
-      {/* Modal de Visualização */}
+      {/* Modal de visualização */}
       {isViewModalOpen && selectedPedido && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
                 <div>
-                  <Title className="text-xl font-semibold text-gray-900">
-                    Pedido #{selectedPedido.pedido_id}
-                  </Title>
-                  <Text className="text-gray-600">
-                    Mesa {selectedPedido.mesa} • {selectedPedido.cliente_nome}
-                  </Text>
+                  <Title>Pedido #{selectedPedido.sale_number}</Title>
+                  <Text className="mt-2">Detalhes do pedido</Text>
                 </div>
                 <Button
-                  onClick={handleViewClose}
                   variant="secondary"
-                  icon={XMarkIcon}
-                  size="xs"
-                />
+                  onClick={handleViewClose}
+                >
+                  Fechar
+                </Button>
               </div>
-            </div>
-            
-            <div className="p-6 overflow-y-auto max-h-96">
+
               <div className="space-y-4">
-                {selectedPedido.pedido_itens.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div className="flex-1">
-                      <Text className="font-medium text-gray-900">{item.item.name}</Text>
-                      <Text className="text-sm text-gray-600">{item.item.description}</Text>
-                    </div>
-                    <div className="text-right">
-                      <Text className="font-medium">{item.quantidade}x</Text>
-                      <Text className="text-sm text-gray-600">
-                        {formatCurrency(item.preco_unit)} cada
-                      </Text>
-                      <Text className="font-semibold text-green-600">
-                        {formatCurrency(item.preco_unit * item.quantidade)}
-                      </Text>
-                    </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Text className="font-medium text-gray-700 dark:text-gray-300">Cliente:</Text>
+                    <Text>{selectedPedido.customer_name || 'N/A'}</Text>
                   </div>
-                ))}
-              </div>
-              
-              <div className="mt-6 pt-4 border-t border-gray-200">
-                <div className="flex justify-between items-center">
-                  <Text className="text-lg font-semibold text-gray-900">Total:</Text>
-                  <Text className="text-xl font-bold text-green-600">
-                    {formatCurrency(selectedPedido.total)}
-                  </Text>
+                  <div>
+                    <Text className="font-medium text-gray-700 dark:text-gray-300">Telefone:</Text>
+                    <Text>{selectedPedido.customer_phone || 'N/A'}</Text>
+                  </div>
+                  <div>
+                    <Text className="font-medium text-gray-700 dark:text-gray-300">Status:</Text>
+                    <Badge color={getStatusColor(selectedPedido.status)}>
+                      {getStatusText(selectedPedido.status)}
+                    </Badge>
+                  </div>
+                  <div>
+                    <Text className="font-medium text-gray-700 dark:text-gray-300">Método de Pagamento:</Text>
+                    <Text>{selectedPedido.payment_method}</Text>
+                  </div>
                 </div>
-                
-                {selectedPedido.observacoes && (
-                  <div className="mt-4 p-3 bg-yellow-50 rounded-lg">
-                    <Text className="text-sm font-medium text-yellow-800">Observações:</Text>
-                    <Text className="text-sm text-yellow-700 mt-1">{selectedPedido.observacoes}</Text>
+
+                <div>
+                  <Text className="font-medium text-gray-700 dark:text-gray-300 mb-2">Itens do Pedido:</Text>
+                  <div className="space-y-2">
+                    {selectedPedido.items.map((item) => (
+                      <div key={item.id} className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                        <div>
+                          <Text className="font-medium">{item.menu_item.name}</Text>
+                          <Text className="text-sm text-gray-500 dark:text-gray-400">
+                            Qtd: {item.quantity} x {formatCurrency(item.unit_price)}
+                          </Text>
+                        </div>
+                        <Text className="font-semibold">{formatCurrency(item.total_price)}</Text>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
+
+                <div className="border-t pt-4">
+                  <div className="flex justify-between items-center">
+                    <Text className="font-medium">Total:</Text>
+                    <Text className="font-bold text-lg">{formatCurrency(selectedPedido.total)}</Text>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -305,4 +309,4 @@ export default function PedidosTable({ pedidos, onUpdate }: PedidosTableProps) {
       )}
     </>
   )
-} 
+}

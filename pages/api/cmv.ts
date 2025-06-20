@@ -11,27 +11,29 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const dataInicio = new Date()
       dataInicio.setDate(dataInicio.getDate() - dias)
 
-      // Buscar pedidos do período
-      const pedidos = await prisma.pedidos.findMany({
+      // Buscar vendas do período
+      const vendas = await prisma.sale.findMany({
         where: { created_at: { gte: dataInicio } },
-        include: { pedido_itens: { include: { item: true } } }
+        include: { items: { include: { menu_item: true } } }
       })
 
-      // Buscar fichas técnicas
-      const fichas = await prisma.fichas_tecnicas.findMany({
+      // Buscar receitas (fichas técnicas)
+      const receitas = await prisma.recipe.findMany({
         include: {
-          item: true,
-          ficha_ingredientes: { include: { ingredient: true } }
+          menu_items: true,
+          ingredients: { include: { ingredient: true } }
         }
       })
 
-      // Mapear custo unitário por item
-      const custoPorItem: Record<number, number> = {}
-      fichas.forEach(ficha => {
-        const custo = ficha.ficha_ingredientes.reduce(
-          (sum, fi) => sum + Number(fi.quantity) * Number(fi.ingredient.cost_per_unit), 0
+      // Mapear custo unitário por menu_item
+      const custoPorMenuItem: Record<number, number> = {}
+      receitas.forEach(receita => {
+        const custo = receita.ingredients.reduce(
+          (sum, ri) => sum + Number(ri.quantity) * Number(ri.ingredient.cost_per_unit), 0
         )
-        custoPorItem[ficha.item_id] = custo
+        receita.menu_items.forEach(mi => {
+          custoPorMenuItem[mi.id] = custo
+        })
       })
 
       // Calcular vendas e custos
@@ -39,28 +41,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       let custoTotal = 0
       const produtos: any[] = []
 
-      const vendasPorItem: Record<number, number> = {}
-      pedidos.forEach(pedido => {
-        pedido.pedido_itens.forEach(pi => {
-          faturamento += Number(pi.preco_unit) * pi.quantidade
-          custoTotal += (custoPorItem[pi.item_id] || 0) * pi.quantidade
-          vendasPorItem[pi.item_id] = (vendasPorItem[pi.item_id] || 0) + pi.quantidade
+      const vendasPorMenuItem: Record<number, number> = {}
+      vendas.forEach(venda => {
+        venda.items.forEach(item => {
+          faturamento += Number(item.unit_price) * item.quantity
+          custoTotal += (custoPorMenuItem[item.menu_item_id] || 0) * item.quantity
+          vendasPorMenuItem[item.menu_item_id] = (vendasPorMenuItem[item.menu_item_id] || 0) + item.quantity
         })
       })
 
       // Detalhe por produto
-      for (const ficha of fichas) {
-        const vendas = vendasPorItem[ficha.item_id] || 0
-        const custo = custoPorItem[ficha.item_id] * vendas
-        const receita = Number(ficha.item.price) * vendas
-        produtos.push({
-          nome: ficha.item.name,
-          vendas,
-          custo_unitario: custoPorItem[ficha.item_id],
-          custo_total: custo,
-          receita,
-          cmv: receita > 0 ? (custo / receita) * 100 : 0
-        })
+      for (const receita of receitas) {
+        for (const mi of receita.menu_items) {
+          const vendas = vendasPorMenuItem[mi.id] || 0
+          const custo = custoPorMenuItem[mi.id] * vendas
+          const receitaTotal = Number(mi.price) * vendas
+          produtos.push({
+            nome: mi.name,
+            vendas,
+            custo_unitario: custoPorMenuItem[mi.id],
+            custo_total: custo,
+            receita: receitaTotal,
+            cmv: receitaTotal > 0 ? (custo / receitaTotal) * 100 : 0
+          })
+        }
       }
 
       const cmvGeral = faturamento > 0 ? (custoTotal / faturamento) * 100 : 0

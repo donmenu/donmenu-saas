@@ -1,3 +1,6 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,220 +10,378 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model teste {
-  idteste Int @id
+// ========================================
+// TABELAS PRINCIPAIS - MULTI-TENANCY
+// ========================================
+
+model Restaurant {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  cnpj        String?  @unique @db.VarChar(18)
+  email       String   @db.VarChar(255)
+  phone       String?  @db.VarChar(20)
+  address     String?  @db.Text
+  city        String?  @db.VarChar(100)
+  state       String?  @db.VarChar(2)
+  zip_code    String?  @db.VarChar(10)
+  logo_url    String?  @db.VarChar(500)
+  active      Boolean  @default(true)
+  plan_type   String   @default("free") @db.VarChar(20) // free, basic, premium
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  // Relacionamentos
+  users       User[]
+  categories  Category[]
+  ingredients Ingredient[]
+  recipes     Recipe[]
+  menus       Menu[]
+  menu_items  MenuItem[]
+  combos      Combo[]
+  combo_items ComboItem[]
+  sales       Sale[]
+  sale_items  SaleItem[]
+  ingredient_prices IngredientPrice[]
+  recipe_ingredients RecipeIngredient[]
+
+  @@map("restaurants")
 }
 
-model users {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  username String?
-  email    String?
-  obs      String?
+model User {
+  id            Int         @id @default(autoincrement())
+  restaurant_id Int
+  name          String      @db.VarChar(255)
+  email         String      @unique @db.VarChar(255)
+  password      String?     @db.VarChar(255) // null se autenticação via Google
+  google_id     String?     @unique @db.VarChar(255)
+  role          String      @default("user") @db.VarChar(20) // owner, manager, user
+  avatar_url    String?     @db.VarChar(500)
+  active        Boolean     @default(true)
+  last_login    DateTime?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+
+  @@map("users")
+  @@index([restaurant_id])
+  @@index([email])
+  @@index([google_id])
 }
 
-model cardapios {
-  id     Int     @id @default(autoincrement())
-  item   String?
-  status String?
+// ========================================
+// CATEGORIAS E CLASSIFICAÇÃO
+// ========================================
+
+model Category {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  name          String   @db.VarChar(100)
+  description   String?  @db.Text
+  color         String?  @db.VarChar(7) // hex color
+  icon          String?  @db.VarChar(50)
+  active        Boolean  @default(true)
+  sort_order    Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  recipes       Recipe[]
+  menu_items    MenuItem[]
+
+  @@unique([restaurant_id, name])
+  @@map("categories")
+  @@index([restaurant_id])
+  @@index([restaurant_id, active])
 }
 
-model categories {
-  category_id Int     @id @default(autoincrement())
-  name        String
-  description String?
-  itens       itens[]
+// ========================================
+// INSUMOS E INGREDIENTES
+// ========================================
+
+model Ingredient {
+  id              Int      @id @default(autoincrement())
+  restaurant_id   Int
+  name            String   @db.VarChar(255)
+  description     String?  @db.Text
+  unit            String   @db.VarChar(20) // kg, g, l, ml, un, pct
+  cost_per_unit   Decimal  @db.Decimal(10, 2)
+  supplier        String?  @db.VarChar(255)
+  min_stock       Decimal? @db.Decimal(10, 2)
+  current_stock   Decimal  @default(0) @db.Decimal(10, 2)
+  active          Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  recipe_ingredients RecipeIngredient[]
+  prices          IngredientPrice[]
+
+  @@unique([restaurant_id, name])
+  @@map("ingredients")
+  @@index([restaurant_id])
+  @@index([restaurant_id, active])
+  @@index([restaurant_id, name])
 }
 
-model ingredients {
-  ingredient_id      Int                  @id @default(autoincrement())
-  name               String
-  unit               String
-  cost_per_unit      Decimal
-  stock              Decimal?             @default(0)
-  created_at         DateTime             @default(now())
-  ficha_ingredientes ficha_ingredientes[]
-}
-
-model item_ingredients {
-  item_ingredient_id Int      @id @default(autoincrement())
-  item_id            Int
-  ingredient_id      Int
-  quantity           Decimal?
-}
-
-model itens {
-  item_id         Int               @id @default(autoincrement())
-  category_id     Int
-  name            String
-  description     String
-  price           Decimal
-  status          Boolean           @default(true)
-  created_at      DateTime          @default(now())
-  fichas_tecnicas fichas_tecnicas[]
-  category        categories        @relation(fields: [category_id], references: [category_id])
-  pedido_itens    pedido_itens[]
-}
-
-model itens_pricing {
-  item_pricing_id Int @id @default(autoincrement())
-  item_id         Int
-  rule_id         Int
-}
-
-model menu_items_price {
-  menu_item_price_id Int       @id @default(autoincrement())
-  menu_item_id       Int?
-  price              Decimal?
-  start_date         DateTime?
-  end_date           DateTime?
-}
-
-model menu_itens {
-  menu_item_id Int @id @default(autoincrement())
-  menu_id      Int
-  item_id      Int
-}
-
-model menu_promotions {
-  menu_promotion_id Int       @id @default(autoincrement())
-  menu_id           Int?
-  name              String?
-  description       String?
-  start_date        DateTime?
-  end_date          DateTime?
-}
-
-model menus {
-  menu_id       Int     @id @default(autoincrement())
-  restaurant_id Int?
-  name          String?
-  description   String?
-
-  @@index([restaurant_id], map: "restaurant_id_idx")
-}
-
-model pricing_methods {
-  method_id   Int    @id @default(autoincrement())
-  name        String
-  description String
-}
-
-model pricing_rules {
-  rule_id             Int     @id @default(autoincrement())
-  method_id           Int?
-  name                String?
-  description         String?
-  calculation_formula String?
-}
-
-model restaurants {
-  restaurant_id Int     @id @default(autoincrement())
-  name          String?
-}
-
-model fichas_tecnicas {
-  ficha_id           Int                  @id @default(autoincrement())
-  item_id            Int
-  yield              Decimal?
-  total_cost         Decimal?
-  price_suggestion   Decimal?
-  created_at         DateTime             @default(now())
-  ficha_ingredientes ficha_ingredientes[]
-  item               itens                @relation(fields: [item_id], references: [item_id], onDelete: Cascade)
-}
-
-model ficha_ingredientes {
-  id            Int             @id @default(autoincrement())
-  ficha_id      Int
+model IngredientPrice {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
   ingredient_id Int
-  quantity      Decimal
-  ficha_tecnica fichas_tecnicas @relation(fields: [ficha_id], references: [ficha_id], onDelete: Cascade)
-  ingredient    ingredients     @relation(fields: [ingredient_id], references: [ingredient_id])
+  price         Decimal  @db.Decimal(10, 2)
+  supplier      String?  @db.VarChar(255)
+  valid_from    DateTime @default(now())
+  valid_to      DateTime?
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+
+  @@map("ingredient_prices")
+  @@index([restaurant_id, ingredient_id])
+  @@index([ingredient_id, valid_from])
 }
 
-model pedidos {
-  pedido_id     Int       @id @default(autoincrement())
-  mesa          String?
-  cliente_nome  String?
-  status        String    @default("pendente")
-  total         Decimal   @default(0)
-  observacoes   String?
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  pedido_itens  pedido_itens[]
-  receitas      receitas[]
+// ========================================
+// FICHAS TÉCNICAS E RECEITAS
+// ========================================
+
+model Recipe {
+  id                Int      @id @default(autoincrement())
+  restaurant_id     Int
+  category_id       Int?
+  name              String   @db.VarChar(255)
+  description       String?  @db.Text
+  yield_quantity    Decimal  @db.Decimal(10, 2) // quantidade que a receita produz
+  yield_unit        String   @db.VarChar(20) // porção, unidade, kg, etc.
+  preparation_time  Int?     // em minutos
+  difficulty        String?  @db.VarChar(20) // fácil, médio, difícil
+  instructions      String?  @db.Text
+  image_url         String?  @db.VarChar(500)
+  active            Boolean  @default(true)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Campos calculados (não persistidos)
+  total_cost        Decimal? @db.Decimal(10, 2) // custo total da receita
+  cost_per_yield    Decimal? @db.Decimal(10, 2) // custo por porção
+
+  // Relacionamentos
+  restaurant        Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  category          Category? @relation(fields: [category_id], references: [id])
+  ingredients       RecipeIngredient[]
+  menu_items        MenuItem[]
+
+  @@unique([restaurant_id, name])
+  @@map("recipes")
+  @@index([restaurant_id])
+  @@index([restaurant_id, category_id])
+  @@index([restaurant_id, active])
 }
 
-model pedido_itens {
-  id           Int      @id @default(autoincrement())
-  pedido_id    Int
-  item_id      Int
-  quantidade   Int      @default(1)
-  preco_unit   Decimal
-  observacoes  String?
-  created_at   DateTime @default(now())
-  pedido       pedidos  @relation(fields: [pedido_id], references: [pedido_id], onDelete: Cascade)
-  item         itens    @relation(fields: [item_id], references: [item_id])
+model RecipeIngredient {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  recipe_id     Int
+  ingredient_id Int
+  quantity      Decimal  @db.Decimal(10, 4) // quantidade necessária
+  unit          String   @db.VarChar(20) // unidade da quantidade
+  cost          Decimal? @db.Decimal(10, 2) // custo calculado (quantity * ingredient.cost_per_unit)
+  notes         String?  @db.Text
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  recipe        Recipe     @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+  ingredient    Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+
+  @@unique([restaurant_id, recipe_id, ingredient_id])
+  @@map("recipe_ingredients")
+  @@index([restaurant_id, recipe_id])
+  @@index([ingredient_id])
 }
 
-model caixa {
-  caixa_id       Int       @id @default(autoincrement())
-  data_abertura  DateTime  @default(now())
-  data_fechamento DateTime?
-  valor_inicial  Decimal   @default(0)
-  valor_final    Decimal?
-  observacoes    String?
-  status         String    @default("aberto")
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
-  
-  receitas       receitas[]
-  despesas       despesas[]
+// ========================================
+// CARDÁPIOS E ITENS
+// ========================================
+
+model Menu {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  name          String   @db.VarChar(255)
+  description   String?  @db.Text
+  type          String   @db.VarChar(50) // almoço, jantar, delivery, sobremesas, etc.
+  active        Boolean  @default(true)
+  sort_order    Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  items         MenuItem[]
+
+  @@unique([restaurant_id, name])
+  @@map("menus")
+  @@index([restaurant_id])
+  @@index([restaurant_id, active])
 }
 
-model categorias_financeiras {
-  categoria_id   Int       @id @default(autoincrement())
-  nome           String
-  tipo           String
-  descricao      String?
-  cor            String?
-  created_at     DateTime  @default(now())
-  
-  receitas       receitas[]
-  despesas       despesas[]
+model MenuItem {
+  id                Int      @id @default(autoincrement())
+  restaurant_id     Int
+  menu_id           Int
+  recipe_id         Int?
+  category_id       Int?
+  name              String   @db.VarChar(255)
+  description       String?  @db.Text
+  price             Decimal  @db.Decimal(10, 2)
+  suggested_price   Decimal? @db.Decimal(10, 2) // preço sugerido pelo sistema
+  desired_margin    Decimal? @db.Decimal(5, 2) // margem desejada em %
+  cost_price        Decimal? @db.Decimal(10, 2) // custo calculado
+  gross_profit      Decimal? @db.Decimal(10, 2) // lucro bruto calculado
+  actual_margin     Decimal? @db.Decimal(5, 2) // margem real calculada
+  manual_pricing    Boolean  @default(false) // se o preço foi definido manualmente
+  image_url         String?  @db.VarChar(500)
+  active            Boolean  @default(true)
+  visible           Boolean  @default(true)
+  sort_order        Int      @default(0)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant        Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  menu              Menu       @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  recipe            Recipe?    @relation(fields: [recipe_id], references: [id])
+  category          Category?  @relation(fields: [category_id], references: [id])
+  combo_items       ComboItem[]
+  sale_items        SaleItem[]
+
+  @@unique([restaurant_id, menu_id, name])
+  @@map("menu_items")
+  @@index([restaurant_id, menu_id])
+  @@index([restaurant_id, active])
+  @@index([restaurant_id, visible])
+  @@index([recipe_id])
+  @@index([category_id])
 }
 
-model receitas {
-  receita_id     Int       @id @default(autoincrement())
-  caixa_id       Int?
-  categoria_id   Int?
-  pedido_id      Int?
-  descricao      String
-  valor          Decimal
-  data_receita   DateTime  @default(now())
-  forma_pagamento String?
-  observacoes    String?
-  created_at     DateTime  @default(now())
-  
-  caixa          caixa?    @relation(fields: [caixa_id], references: [caixa_id])
-  categoria      categorias_financeiras? @relation(fields: [categoria_id], references: [categoria_id])
-  pedido         pedidos?  @relation(fields: [pedido_id], references: [pedido_id])
+// ========================================
+// COMBOS E PROMOÇÕES
+// ========================================
+
+model Combo {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  name          String   @db.VarChar(255)
+  description   String?  @db.Text
+  price         Decimal  @db.Decimal(10, 2)
+  discount      Decimal? @db.Decimal(5, 2) // desconto em %
+  active        Boolean  @default(true)
+  valid_from    DateTime?
+  valid_to      DateTime?
+  image_url     String?  @db.VarChar(500)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  items         ComboItem[]
+  sale_items    SaleItem[]
+
+  @@unique([restaurant_id, name])
+  @@map("combos")
+  @@index([restaurant_id])
+  @@index([restaurant_id, active])
 }
 
-model despesas {
-  despesa_id     Int       @id @default(autoincrement())
-  caixa_id       Int?
-  categoria_id   Int?
-  descricao      String
-  valor          Decimal
-  data_despesa   DateTime  @default(now())
-  forma_pagamento String?
-  fornecedor     String?
-  nota_fiscal    String?
-  observacoes    String?
-  created_at     DateTime  @default(now())
-  
-  caixa          caixa?    @relation(fields: [caixa_id], references: [caixa_id])
-  categoria      categorias_financeiras? @relation(fields: [categoria_id], references: [categoria_id])
+model ComboItem {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  combo_id      Int
+  menu_item_id  Int
+  quantity      Int      @default(1)
+  discount      Decimal? @db.Decimal(5, 2) // desconto específico do item no combo
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  combo         Combo      @relation(fields: [combo_id], references: [id], onDelete: Cascade)
+  menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id], onDelete: Cascade)
+
+  @@unique([restaurant_id, combo_id, menu_item_id])
+  @@map("combo_items")
+  @@index([restaurant_id, combo_id])
+  @@index([menu_item_id])
 }
+
+// ========================================
+// VENDAS E HISTÓRICO
+// ========================================
+
+model Sale {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  sale_number   String   @db.VarChar(50)
+  customer_name String?  @db.VarChar(255)
+  customer_phone String? @db.VarChar(20)
+  subtotal      Decimal  @db.Decimal(10, 2)
+  discount      Decimal  @default(0) @db.Decimal(10, 2)
+  total         Decimal  @db.Decimal(10, 2)
+  payment_method String  @db.VarChar(50) // dinheiro, cartão, pix, etc.
+  status        String   @default("completed") @db.VarChar(20) // pending, completed, cancelled
+  notes         String?  @db.Text
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  items         SaleItem[]
+
+  @@unique([restaurant_id, sale_number])
+  @@map("sales")
+  @@index([restaurant_id])
+  @@index([restaurant_id, created_at])
+  @@index([restaurant_id, status])
+}
+
+model SaleItem {
+  id            Int      @id @default(autoincrement())
+  restaurant_id Int
+  sale_id       Int
+  menu_item_id  Int
+  combo_id      Int?
+  quantity      Int
+  unit_price    Decimal  @db.Decimal(10, 2)
+  total_price   Decimal  @db.Decimal(10, 2)
+  cost_price    Decimal? @db.Decimal(10, 2)
+  gross_profit  Decimal? @db.Decimal(10, 2)
+  margin        Decimal? @db.Decimal(5, 2)
+  created_at    DateTime @default(now())
+
+  // Relacionamentos
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  sale          Sale       @relation(fields: [sale_id], references: [id], onDelete: Cascade)
+  menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id])
+  combo         Combo?     @relation(fields: [combo_id], references: [id])
+
+  @@map("sale_items")
+  @@index([restaurant_id, sale_id])
+  @@index([menu_item_id])
+  @@index([combo_id])
+  @@index([restaurant_id, created_at])
+}
+
+// ========================================
+// ÍNDICES ADICIONAIS PARA PERFORMANCE
+// ========================================
+
+// Índices compostos para consultas frequentes
+// @@index([restaurant_id, active, visible]) // para listagem de itens ativos
+// @@index([restaurant_id, category_id, active]) // para filtros por categoria
+// @@index([restaurant_id, created_at]) // para relatórios por período
+// @@index([restaurant_id, payment_method, created_at]) // para relatórios financeiros

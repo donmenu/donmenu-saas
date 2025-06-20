@@ -15,30 +15,47 @@ import { useState } from 'react';
 import { ViewFichaTecnica, EditFichaTecnica } from './index';
 
 interface FichaTecnica {
-  ficha_id: number
-  item_id: number
-  yield: number | null
-  total_cost: number | null
-  price_suggestion: number | null
+  id: number
+  restaurant_id: number
+  category_id: number | null
+  name: string
+  description: string | null
+  yield_quantity: string
+  yield_unit: string
+  preparation_time: number | null
+  difficulty: string | null
+  instructions: string | null
+  image_url: string | null
+  active: boolean
   created_at: string
-  item: {
-    item_id: number
-    name: string
-    description: string
-    price: number
-    category: {
-      category_id: number
-      name: string
-    }
-  }
-  ficha_ingredientes: {
+  updated_at: string
+  total_cost: string | null
+  cost_per_yield: string | null
+  category: {
     id: number
-    quantity: number
+    name: string
+    description: string | null
+    color: string | null
+    icon: string | null
+  } | null
+  ingredients: {
+    id: number
+    restaurant_id: number
+    recipe_id: number
+    ingredient_id: number
+    quantity: string
+    unit: string
+    cost: string | null
+    notes: string | null
+    created_at: string
+    updated_at: string
     ingredient: {
-      ingredient_id: number
+      id: number
       name: string
+      description: string | null
       unit: string
-      cost_per_unit: number
+      cost_per_unit: string
+      supplier: string | null
     }
   }[]
 }
@@ -73,22 +90,26 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
     setSelectedFicha(null);
   };
 
-  const formatCurrency = (value: number | null) => {
+  const formatCurrency = (value: string | null) => {
     if (value === null) return '-';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value);
+    }).format(parseFloat(value));
   };
 
-  const calculateProfit = (price: number, cost: number | null) => {
+  const calculateProfit = (cost: string | null) => {
     if (cost === null) return null;
-    return price - cost;
+    // Estimativa de preço baseada no custo + margem de 60%
+    const costValue = parseFloat(cost);
+    const estimatedPrice = costValue * 1.6; // 60% de margem
+    return estimatedPrice - costValue;
   };
 
-  const calculateMargin = (price: number, cost: number | null) => {
-    if (cost === null || cost === 0) return null;
-    return ((price - cost) / price) * 100;
+  const calculateMargin = (cost: string | null) => {
+    if (cost === null || parseFloat(cost) === 0) return null;
+    // Margem estimada de 60%
+    return 60;
   };
 
   const getMarginColor = (margin: number | null) => {
@@ -110,48 +131,48 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
       <div className="overflow-x-auto">
         <Table>
           <TableHead>
-            <TableRow className="border-b border-gray-200">
-              <TableHeaderCell className="text-left font-semibold text-gray-900">Item</TableHeaderCell>
-              <TableHeaderCell className="text-left font-semibold text-gray-900">Categoria</TableHeaderCell>
-              <TableHeaderCell className="text-right font-semibold text-gray-900">Preço</TableHeaderCell>
-              <TableHeaderCell className="text-right font-semibold text-gray-900">Custo</TableHeaderCell>
-              <TableHeaderCell className="text-right font-semibold text-gray-900">Lucro</TableHeaderCell>
-              <TableHeaderCell className="text-right font-semibold text-gray-900">Margem</TableHeaderCell>
-              <TableHeaderCell className="text-center font-semibold text-gray-900">Ingredientes</TableHeaderCell>
-              <TableHeaderCell className="text-center font-semibold text-gray-900">Ações</TableHeaderCell>
+            <TableRow className="border-b border-gray-200 dark:border-gray-700">
+              <TableHeaderCell className="text-left font-semibold text-gray-900 dark:text-white">Receita</TableHeaderCell>
+              <TableHeaderCell className="text-left font-semibold text-gray-900 dark:text-white">Categoria</TableHeaderCell>
+              <TableHeaderCell className="text-right font-semibold text-gray-900 dark:text-white">Rendimento</TableHeaderCell>
+              <TableHeaderCell className="text-right font-semibold text-gray-900 dark:text-white">Custo</TableHeaderCell>
+              <TableHeaderCell className="text-right font-semibold text-gray-900 dark:text-white">Lucro Est.</TableHeaderCell>
+              <TableHeaderCell className="text-right font-semibold text-gray-900 dark:text-white">Margem</TableHeaderCell>
+              <TableHeaderCell className="text-center font-semibold text-gray-900 dark:text-white">Ingredientes</TableHeaderCell>
+              <TableHeaderCell className="text-center font-semibold text-gray-900 dark:text-white">Ações</TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {fichasTecnicas.map((ficha) => {
-              const profit = calculateProfit(ficha.item.price, ficha.total_cost);
-              const margin = calculateMargin(ficha.item.price, ficha.total_cost);
+              const profit = calculateProfit(ficha.total_cost);
+              const margin = calculateMargin(ficha.total_cost);
               
               return (
-                <TableRow key={ficha.ficha_id} className="hover:bg-gray-50 transition-colors">
+                <TableRow key={ficha.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <TableCell>
                     <div>
-                      <Text className="font-semibold text-gray-900">{ficha.item.name}</Text>
-                      <Text className="text-sm text-gray-500">{ficha.item.description}</Text>
+                      <Text className="font-semibold text-gray-900 dark:text-white">{ficha.name}</Text>
+                      <Text className="text-sm text-gray-500 dark:text-gray-400">{ficha.description}</Text>
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge color="blue" className="bg-blue-100 text-blue-800 border-0">
-                      {ficha.item.category.name}
+                    <Badge color="blue" className="bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-0">
+                      {ficha.category?.name || 'Sem categoria'}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Text className="font-semibold text-green-600">
-                      {formatCurrency(ficha.item.price)}
+                    <Text className="font-semibold text-green-600 dark:text-green-400">
+                      {ficha.yield_quantity} {ficha.yield_unit}
                     </Text>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Text className="font-semibold text-red-600">
+                    <Text className="font-semibold text-red-600 dark:text-red-400">
                       {formatCurrency(ficha.total_cost)}
                     </Text>
                   </TableCell>
                   <TableCell className="text-right">
                     <Text className={`font-semibold ${getProfitColor(profit)}`}>
-                      {formatCurrency(profit)}
+                      {formatCurrency(profit?.toString())}
                     </Text>
                   </TableCell>
                   <TableCell className="text-right">
@@ -160,8 +181,8 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
                     </Badge>
                   </TableCell>
                   <TableCell className="text-center">
-                    <Badge color="gray" className="bg-gray-100 text-gray-700 border-0">
-                      {ficha.ficha_ingredientes.length} ingredientes
+                    <Badge color="gray" className="bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-0">
+                      {ficha.ingredients.length} ingredientes
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -170,7 +191,7 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
                         size="xs"
                         variant="secondary"
                         onClick={() => handleView(ficha)}
-                        className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-0"
+                        className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-800/40 border-0"
                       >
                         Visualizar
                       </Button>
@@ -178,7 +199,7 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
                         size="xs"
                         variant="secondary"
                         onClick={() => handleEdit(ficha)}
-                        className="bg-green-50 text-green-700 hover:bg-green-100 border-0"
+                        className="bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-800/40 border-0"
                       >
                         Editar
                       </Button>
@@ -195,26 +216,35 @@ export default function FichaTecnicaTable({ fichasTecnicas, onUpdate }: FichaTec
         isOpen={isViewModalOpen}
         onClose={handleViewClose}
         item={selectedFicha ? {
-          item_id: selectedFicha.item_id,
-          name: selectedFicha.item.name,
-          description: selectedFicha.item.description,
-          price: selectedFicha.item.price,
-          categories: selectedFicha.item.category
+          item_id: selectedFicha.id,
+          name: selectedFicha.name,
+          description: selectedFicha.description || '',
+          price: parseFloat(selectedFicha.total_cost || '0'),
+          categories: {
+            category_id: selectedFicha.category?.id || 0,
+            name: selectedFicha.category?.name || ''
+          }
         } : null}
       />
 
       <EditFichaTecnica
         isOpen={isEditModalOpen}
         onClose={handleEditClose}
-        onSuccess={onUpdate}
+        onSuccess={() => {
+          handleEditClose();
+          onUpdate();
+        }}
         item={selectedFicha ? {
-          item_id: selectedFicha.item_id,
-          name: selectedFicha.item.name,
-          description: selectedFicha.item.description,
-          price: selectedFicha.item.price,
-          categories: selectedFicha.item.category
+          item_id: selectedFicha.id,
+          name: selectedFicha.name,
+          description: selectedFicha.description || '',
+          price: parseFloat(selectedFicha.total_cost || '0'),
+          categories: {
+            category_id: selectedFicha.category?.id || 0,
+            name: selectedFicha.category?.name || ''
+          }
         } : null}
       />
     </>
   );
-} 
+}
