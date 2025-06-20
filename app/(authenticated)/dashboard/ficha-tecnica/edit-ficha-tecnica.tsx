@@ -44,19 +44,6 @@ export default function EditFichaTecnica({ isOpen, onClose, onSuccess, item }: E
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchAvailableIngredients();
-      if (item) {
-        fetchCurrentIngredients();
-      }
-    }
-  }, [isOpen, item]);
-
-  useEffect(() => {
-    fetchCurrentIngredients();
-  }, [fetchCurrentIngredients]);
-
   const fetchAvailableIngredients = async () => {
     try {
       const { data, error } = await supabase
@@ -96,6 +83,19 @@ export default function EditFichaTecnica({ isOpen, onClose, onSuccess, item }: E
       console.error('Erro ao buscar ingredientes do item:', err);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchAvailableIngredients();
+      if (item) {
+        fetchCurrentIngredients();
+      }
+    }
+  }, [isOpen, item]);
+
+  useEffect(() => {
+    fetchCurrentIngredients();
+  }, [fetchCurrentIngredients]);
 
   const handleAddIngredient = () => {
     if (!selectedIngredient || !quantity || !item) return;
