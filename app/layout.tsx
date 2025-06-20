@@ -1,12 +1,11 @@
-
 import './globals.css'
 
 import Nav from './nav'
 import AnalyticsWrapper from './analytics'
 import Toast from './toast'
 import Footer from './footer'
-import { SessionProvider } from 'next-auth/react'
 import { Suspense } from 'react'
+import SessionProviderWrapper from './session-provider'
 
 export const metadata = {
   title: 'Don Menu',
@@ -23,16 +22,15 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" className="h-full bg-gray-50">
       <body className="h-full">
-        <SessionProvider>
+        <SessionProviderWrapper>
           <Suspense fallback="...">
-            {/* @ts-expect-error Server Component */}
             <Nav />
           </Suspense>
           {children}
           <AnalyticsWrapper />
           {/*<Toast />*/}
           <Footer />
-        </SessionProvider>
+        </SessionProviderWrapper>
       </body>
     </html>
   )

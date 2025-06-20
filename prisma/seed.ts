@@ -5,260 +5,143 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
 
-  // Criar categorias
-  console.log('📂 Criando categorias...')
-  const categorias = await Promise.all([
-    prisma.categories.create({
-      data: {
-        name: 'Entradas'
-      }
-    }),
-    prisma.categories.create({
-      data: {
-        name: 'Pratos Principais'
-      }
-    }),
-    prisma.categories.create({
-      data: {
-        name: 'Sobremesas'
-      }
-    }),
-    prisma.categories.create({
-      data: {
-        name: 'Bebidas'
-      }
-    })
-  ])
+  // Criar categorias financeiras para receitas
+  const categoriasReceitas = [
+    { nome: 'Vendas de Alimentos', tipo: 'receita', descricao: 'Receitas provenientes da venda de alimentos' },
+    { nome: 'Vendas de Bebidas', tipo: 'receita', descricao: 'Receitas provenientes da venda de bebidas' },
+    { nome: 'Delivery', tipo: 'receita', descricao: 'Receitas de pedidos delivery' },
+    { nome: 'Eventos', tipo: 'receita', descricao: 'Receitas de eventos e festas' },
+    { nome: 'Outros', tipo: 'receita', descricao: 'Outras receitas' },
+  ]
 
-  // Criar ingredientes
-  console.log('🥕 Criando ingredientes...')
-  const ingredientes = await Promise.all([
-    prisma.ingredients.create({
-      data: {
-        name: 'Carne Bovina',
-        unit: 'kg',
-        cost_per_unit: 45.00
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Frango',
-        unit: 'kg',
-        cost_per_unit: 18.50
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Arroz',
-        unit: 'kg',
-        cost_per_unit: 8.00
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Feijão',
-        unit: 'kg',
-        cost_per_unit: 12.00
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Tomate',
-        unit: 'kg',
-        cost_per_unit: 6.50
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Cebola',
-        unit: 'kg',
-        cost_per_unit: 4.00
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Alho',
-        unit: 'kg',
-        cost_per_unit: 15.00
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Queijo',
-        unit: 'kg',
-        cost_per_unit: 28.00
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Farinha de Trigo',
-        unit: 'kg',
-        cost_per_unit: 5.50
-      }
-    }),
-    prisma.ingredients.create({
-      data: {
-        name: 'Açúcar',
-        unit: 'kg',
-        cost_per_unit: 4.50
-      }
-    })
-  ])
+  // Criar categorias financeiras para despesas
+  const categoriasDespesas = [
+    { nome: 'Insumos e Ingredientes', tipo: 'despesa', descricao: 'Compra de ingredientes e insumos' },
+    { nome: 'Funcionários', tipo: 'despesa', descricao: 'Salários e benefícios de funcionários' },
+    { nome: 'Aluguel', tipo: 'despesa', descricao: 'Aluguel do estabelecimento' },
+    { nome: 'Contas Públicas', tipo: 'despesa', descricao: 'Água, luz, gás, internet' },
+    { nome: 'Manutenção', tipo: 'despesa', descricao: 'Manutenção de equipamentos' },
+    { nome: 'Marketing', tipo: 'despesa', descricao: 'Publicidade e marketing' },
+    { nome: 'Impostos', tipo: 'despesa', descricao: 'Impostos e taxas' },
+    { nome: 'Outros', tipo: 'despesa', descricao: 'Outras despesas' },
+  ]
 
-  // Criar itens do cardápio
-  console.log('🍽️ Criando itens do cardápio...')
-  const itens = await Promise.all([
-    prisma.itens.create({
-      data: {
-        name: 'Picanha Grelhada',
-        description: 'Picanha grelhada na brasa com acompanhamentos',
-        price: 89.90,
-        category_id: categorias[1].category_id // Pratos Principais
-      }
-    }),
-    prisma.itens.create({
-      data: {
-        name: 'Frango à Parmegiana',
-        description: 'Filé de frango empanado com molho de tomate e queijo',
-        price: 45.90,
-        category_id: categorias[1].category_id // Pratos Principais
-      }
-    }),
-    prisma.itens.create({
-      data: {
-        name: 'Arroz com Feijão',
-        description: 'Arroz branco com feijão preto',
-        price: 12.90,
-        category_id: categorias[1].category_id // Pratos Principais
-      }
-    }),
-    prisma.itens.create({
-      data: {
-        name: 'Salada Caesar',
-        description: 'Alface, croutons, parmesão e molho caesar',
-        price: 28.90,
-        category_id: categorias[0].category_id // Entradas
-      }
-    }),
-    prisma.itens.create({
-      data: {
-        name: 'Pudim de Leite',
-        description: 'Pudim de leite condensado com calda de caramelo',
-        price: 15.90,
-        category_id: categorias[2].category_id // Sobremesas
-      }
-    })
-  ])
+  console.log('📊 Criando categorias financeiras...')
+  for (const categoria of [...categoriasReceitas, ...categoriasDespesas]) {
+    try {
+      await prisma.categorias_financeiras.create({
+        data: categoria,
+      })
+      console.log(`✅ Categoria criada: ${categoria.nome}`)
+    } catch (error) {
+      console.log(`⚠️ Categoria já existe: ${categoria.nome}`)
+    }
+  }
 
-  // Criar fichas técnicas
-  console.log('📋 Criando fichas técnicas...')
-  const fichasTecnicas = await Promise.all([
-    // Ficha técnica da Picanha
-    prisma.fichas_tecnicas.create({
-      data: {
-        item_id: itens[0].item_id,
-        yield: 1.0, // 1 porção
-        total_cost: 35.00,
-        price_suggestion: 89.90
-      }
-    }),
-    // Ficha técnica do Frango à Parmegiana
-    prisma.fichas_tecnicas.create({
-      data: {
-        item_id: itens[1].item_id,
-        yield: 1.0,
-        total_cost: 18.50,
-        price_suggestion: 45.90
-      }
-    }),
-    // Ficha técnica do Arroz com Feijão
-    prisma.fichas_tecnicas.create({
-      data: {
-        item_id: itens[2].item_id,
-        yield: 1.0,
-        total_cost: 6.00,
-        price_suggestion: 12.90
-      }
-    })
-  ])
+  // Criar um caixa aberto de exemplo
+  console.log('💰 Criando caixa inicial...')
+  const caixaAberto = await prisma.caixa.findFirst({
+    where: { status: 'aberto' }
+  })
 
-  // Criar ingredientes das fichas técnicas
-  console.log('🥄 Adicionando ingredientes às fichas técnicas...')
-  
-  // Ingredientes da Picanha
-  await Promise.all([
-    prisma.ficha_ingredientes.create({
+  if (!caixaAberto) {
+    await prisma.caixa.create({
       data: {
-        ficha_id: fichasTecnicas[0].ficha_id,
-        ingredient_id: ingredientes[0].ingredient_id, // Carne Bovina
-        quantity: 0.3 // 300g
-      }
-    }),
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[0].ficha_id,
-        ingredient_id: ingredientes[4].ingredient_id, // Tomate
-        quantity: 0.1 // 100g
-      }
-    }),
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[0].ficha_id,
-        ingredient_id: ingredientes[5].ingredient_id, // Cebola
-        quantity: 0.05 // 50g
+        valor_inicial: 100.00,
+        status: 'aberto',
+        observacoes: 'Caixa inicial do sistema'
       }
     })
-  ])
+    console.log('✅ Caixa inicial criado')
+  } else {
+    console.log('⚠️ Caixa já existe')
+  }
 
-  // Ingredientes do Frango à Parmegiana
-  await Promise.all([
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[1].ficha_id,
-        ingredient_id: ingredientes[1].ingredient_id, // Frango
-        quantity: 0.25 // 250g
-      }
-    }),
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[1].ficha_id,
-        ingredient_id: ingredientes[7].ingredient_id, // Queijo
-        quantity: 0.1 // 100g
-      }
-    }),
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[1].ficha_id,
-        ingredient_id: ingredientes[8].ingredient_id, // Farinha
-        quantity: 0.05 // 50g
-      }
-    })
-  ])
+  // Criar algumas receitas de exemplo
+  console.log('📈 Criando receitas de exemplo...')
+  const receitasExemplo = [
+    {
+      descricao: 'Venda de X-Burger',
+      valor: 25.90,
+      forma_pagamento: 'dinheiro',
+      observacoes: 'Venda realizada na mesa 1'
+    },
+    {
+      descricao: 'Venda de Batata Frita',
+      valor: 12.90,
+      forma_pagamento: 'cartao',
+      observacoes: 'Venda realizada na mesa 2'
+    },
+    {
+      descricao: 'Delivery - X-Burger',
+      valor: 30.90,
+      forma_pagamento: 'pix',
+      observacoes: 'Pedido delivery - taxa de entrega incluída'
+    }
+  ]
 
-  // Ingredientes do Arroz com Feijão
-  await Promise.all([
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[2].ficha_id,
-        ingredient_id: ingredientes[2].ingredient_id, // Arroz
-        quantity: 0.15 // 150g
-      }
-    }),
-    prisma.ficha_ingredientes.create({
-      data: {
-        ficha_id: fichasTecnicas[2].ficha_id,
-        ingredient_id: ingredientes[3].ingredient_id, // Feijão
-        quantity: 0.1 // 100g
-      }
-    })
-  ])
+  for (const receita of receitasExemplo) {
+    try {
+      await prisma.receitas.create({
+        data: {
+          ...receita,
+          data_receita: new Date()
+        }
+      })
+      console.log(`✅ Receita criada: ${receita.descricao}`)
+    } catch (error) {
+      console.log(`⚠️ Erro ao criar receita: ${receita.descricao}`)
+    }
+  }
+
+  // Criar algumas despesas de exemplo
+  console.log('📉 Criando despesas de exemplo...')
+  const despesasExemplo = [
+    {
+      descricao: 'Compra de Carne Bovina',
+      valor: 150.00,
+      forma_pagamento: 'dinheiro',
+      fornecedor: 'Frigorífico Silva',
+      nota_fiscal: 'NF001/2024',
+      observacoes: 'Compra de 6kg de carne bovina'
+    },
+    {
+      descricao: 'Conta de Luz',
+      valor: 89.50,
+      forma_pagamento: 'boleto',
+      fornecedor: 'Companhia de Energia',
+      nota_fiscal: 'FAT001/2024',
+      observacoes: 'Conta de luz do mês'
+    },
+    {
+      descricao: 'Manutenção do Freezer',
+      valor: 200.00,
+      forma_pagamento: 'pix',
+      fornecedor: 'Técnico João',
+      observacoes: 'Manutenção preventiva do freezer'
+    }
+  ]
+
+  for (const despesa of despesasExemplo) {
+    try {
+      await prisma.despesas.create({
+        data: {
+          ...despesa,
+          data_despesa: new Date()
+        }
+      })
+      console.log(`✅ Despesa criada: ${despesa.descricao}`)
+    } catch (error) {
+      console.log(`⚠️ Erro ao criar despesa: ${despesa.descricao}`)
+    }
+  }
 
   console.log('✅ Seed concluído com sucesso!')
-  console.log(`📊 Dados criados:`)
-  console.log(`   - ${categorias.length} categorias`)
-  console.log(`   - ${ingredientes.length} ingredientes`)
-  console.log(`   - ${itens.length} itens do cardápio`)
-  console.log(`   - ${fichasTecnicas.length} fichas técnicas`)
+  console.log('📊 Dados criados:')
+  console.log(`   - ${categoriasReceitas.length + categoriasDespesas.length} categorias financeiras`)
+  console.log(`   - 1 caixa inicial`)
+  console.log(`   - ${receitasExemplo.length} receitas de exemplo`)
+  console.log(`   - ${despesasExemplo.length} despesas de exemplo`)
 }
 
 main()

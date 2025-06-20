@@ -59,6 +59,7 @@ model itens {
   created_at      DateTime          @default(now())
   fichas_tecnicas fichas_tecnicas[]
   category        categories        @relation(fields: [category_id], references: [category_id])
+  pedido_itens    pedido_itens[]
 }
 
 model itens_pricing {
@@ -136,4 +137,90 @@ model ficha_ingredientes {
   quantity      Decimal
   ficha_tecnica fichas_tecnicas @relation(fields: [ficha_id], references: [ficha_id], onDelete: Cascade)
   ingredient    ingredients     @relation(fields: [ingredient_id], references: [ingredient_id])
+}
+
+model pedidos {
+  pedido_id     Int       @id @default(autoincrement())
+  mesa          String?
+  cliente_nome  String?
+  status        String    @default("pendente")
+  total         Decimal   @default(0)
+  observacoes   String?
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  pedido_itens  pedido_itens[]
+  receitas      receitas[]
+}
+
+model pedido_itens {
+  id           Int      @id @default(autoincrement())
+  pedido_id    Int
+  item_id      Int
+  quantidade   Int      @default(1)
+  preco_unit   Decimal
+  observacoes  String?
+  created_at   DateTime @default(now())
+  pedido       pedidos  @relation(fields: [pedido_id], references: [pedido_id], onDelete: Cascade)
+  item         itens    @relation(fields: [item_id], references: [item_id])
+}
+
+model caixa {
+  caixa_id       Int       @id @default(autoincrement())
+  data_abertura  DateTime  @default(now())
+  data_fechamento DateTime?
+  valor_inicial  Decimal   @default(0)
+  valor_final    Decimal?
+  observacoes    String?
+  status         String    @default("aberto")
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  
+  receitas       receitas[]
+  despesas       despesas[]
+}
+
+model categorias_financeiras {
+  categoria_id   Int       @id @default(autoincrement())
+  nome           String
+  tipo           String
+  descricao      String?
+  cor            String?
+  created_at     DateTime  @default(now())
+  
+  receitas       receitas[]
+  despesas       despesas[]
+}
+
+model receitas {
+  receita_id     Int       @id @default(autoincrement())
+  caixa_id       Int?
+  categoria_id   Int?
+  pedido_id      Int?
+  descricao      String
+  valor          Decimal
+  data_receita   DateTime  @default(now())
+  forma_pagamento String?
+  observacoes    String?
+  created_at     DateTime  @default(now())
+  
+  caixa          caixa?    @relation(fields: [caixa_id], references: [caixa_id])
+  categoria      categorias_financeiras? @relation(fields: [categoria_id], references: [categoria_id])
+  pedido         pedidos?  @relation(fields: [pedido_id], references: [pedido_id])
+}
+
+model despesas {
+  despesa_id     Int       @id @default(autoincrement())
+  caixa_id       Int?
+  categoria_id   Int?
+  descricao      String
+  valor          Decimal
+  data_despesa   DateTime  @default(now())
+  forma_pagamento String?
+  fornecedor     String?
+  nota_fiscal    String?
+  observacoes    String?
+  created_at     DateTime  @default(now())
+  
+  caixa          caixa?    @relation(fields: [caixa_id], references: [caixa_id])
+  categoria      categorias_financeiras? @relation(fields: [categoria_id], references: [categoria_id])
 }

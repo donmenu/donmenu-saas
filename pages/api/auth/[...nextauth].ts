@@ -14,10 +14,11 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   pages: {
-    signIn: '/login' // <- define sua página personalizada
+    signIn: '/login'
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
+      if (url.includes('/dashboard')) return url
       return `${baseUrl}/dashboard`
     },
   },
