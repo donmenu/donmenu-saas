@@ -37,7 +37,7 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
 
   useEffect(() => {
     fetchData()
-  }, [search])
+  }, [fetchData])
 
   const handleAddSuccess = () => {
     fetchData()

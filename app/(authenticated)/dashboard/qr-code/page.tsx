@@ -3,6 +3,7 @@
 import { Card, Title, Text, Button } from '@tremor/react'
 import { useState } from 'react'
 import { QrCodeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 
 export default function QRCodePage() {
   const [qrCodeUrl, setQrCodeUrl] = useState('')
@@ -124,11 +125,7 @@ export default function QRCodePage() {
               {qrCodeUrl ? (
                 <div className="text-center">
                   <div className="bg-white p-4 rounded-lg border-2 border-gray-200 inline-block mb-4">
-                    <img 
-                      src={qrCodeUrl} 
-                      alt="QR Code do Cardápio" 
-                      className="w-48 h-48"
-                    />
+                    <Image src={qrCodeUrl} alt="QR Code" width={200} height={200} className="mx-auto" />
                   </div>
                   
                   <Button

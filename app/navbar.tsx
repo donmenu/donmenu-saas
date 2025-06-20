@@ -8,6 +8,7 @@ import {
   XMarkIcon,
   ChevronDownIcon
 } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -85,7 +86,7 @@ export default function Navbar() {
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center space-x-2 focus:outline-none"
                 >
-                  <img src={session.user?.image || '/images/logo.svg'} alt={session.user?.name || 'Usuário'} className="w-8 h-8 rounded-full" />
+                  <Image src={session.user?.image || '/images/logo.svg'} alt={session.user?.name || 'Usuário'} width={32} height={32} className="w-8 h-8 rounded-full" />
                   <span className="font-medium text-gray-900">{session.user?.name?.split(' ')[0]}</span>
                   <ChevronDownIcon className="w-4 h-4 text-gray-500" />
                 </button>

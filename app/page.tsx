@@ -181,8 +181,8 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "O Don Menu me ajudou a entender meus custos e aumentar meu lucro. 
-                O assistente de IA é como ter um consultor na cozinha!"
+                &quot;O Don Menu me ajudou a entender meus custos e aumentar meu lucro. 
+                O assistente de IA é como ter um consultor na cozinha!&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
@@ -202,8 +202,8 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "Nunca foi tão fácil montar ficha técnica e precificar meus pratos. 
-                Recomendo para todo pequeno restaurante!"
+                &quot;Nunca foi tão fácil montar ficha técnica e precificar meus pratos. 
+                Recomendo para todo pequeno restaurante!&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
@@ -223,8 +223,8 @@ export default function HomePage() {
                 ))}
               </div>
               <p className="text-gray-600 mb-6 italic">
-                "O sistema é simples, bonito e me dá segurança para crescer. 
-                Valeu cada centavo investido!"
+                &quot;O sistema é simples, bonito e me dá segurança para crescer. 
+                Valeu cada centavo investido!&quot;
               </p>
               <div className="flex items-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
