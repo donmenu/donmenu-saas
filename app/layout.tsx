@@ -1,18 +1,16 @@
 import './globals.css'
-
-import Nav from './nav'
-import AnalyticsWrapper from './analytics'
-import Toast from './toast'
-import Footer from './footer'
-import { Suspense } from 'react'
-import SessionProviderWrapper from './session-provider'
+import { Inter } from 'next/font/google'
+import  Analytics  from './analytics'
+import SessionProvider from './session-provider'
 import { ThemeProvider } from '../lib/contexts/ThemeContext'
+import Navbar from './navbar'
+import Footer from './footer'
+
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'Don Menu',
-  description: 'Don Menu é um sistema de cardápio digital para restaurantes, bares e lanchonetes.',
-  url: 'https://donmenu.com.br',
-  siteName: 'Don Menu',
+  title: 'Don Menu - Gestão Inteligente para Restaurantes',
+  description: 'O Don Menu é um sistema de gestão completo para restaurantes, bares e lanchonetes. Oferecemos cardápio digital com QR code, ficha técnica, gestão de insumos e muito mais.'
 }
 
 export default function RootLayout({
@@ -21,19 +19,18 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR" className="h-full">
-      <body className="h-full bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
-        <ThemeProvider>
-          <SessionProviderWrapper>
-            <Suspense fallback="...">
-              <Nav />
-            </Suspense>
-            {children}
-            <AnalyticsWrapper />
-            {/*<Toast />*/}
-            <Footer />
-          </SessionProviderWrapper>
-        </ThemeProvider>
+    <html lang="pt-BR" className={inter.className}>
+      <body className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <SessionProvider>
+          <ThemeProvider>
+            <div className="flex flex-col min-h-screen">
+              <Navbar />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+            </div>
+            <Analytics />
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   )

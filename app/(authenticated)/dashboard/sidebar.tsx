@@ -18,6 +18,7 @@ import {
   ChartBarIcon
 } from '@heroicons/react/24/outline'
 import ThemeToggle from '../../../components/ThemeToggle'
+import Image from 'next/image'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -79,7 +80,9 @@ export default function Sidebar() {
         {!collapsed && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">D</span>
+              <span className="text-white font-bold text-sm">
+                <Image src="/images/logo.svg" alt="Don Menu" width={32} height={32} />
+              </span>
             </div>
             <span className="text-lg font-semibold text-gray-900 dark:text-white">DonMenu</span>
           </div>

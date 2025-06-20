@@ -1,18 +1,13 @@
 import Sidebar from './sidebar'
-import SessionWrapper from './session-wrapper'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SessionWrapper>
-      <div className="flex min-h-screen bg-transparent">
-        <Sidebar />
-        <div className="flex-1 flex flex-col ml-64">
-          <main className="flex-1 p-4 md:p-6 lg:p-10">
-            {children}
-          </main>
-        </div>
-      </div>
-    </SessionWrapper>
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-800">
+      <Sidebar />
+      <main className="flex-1 overflow-y-auto">
+        {children}
+      </main>
+    </div>
   )
 }
   

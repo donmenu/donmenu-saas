@@ -28,7 +28,9 @@ export default function Navbar() {
           <div className="flex items-center">
             <Link href="/" className="flex items-center">
               <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
-                <span className="text-white font-bold text-lg">D</span>
+                <span className="text-white font-bold text-lg">
+                  <Image src="/images/logo.svg" alt="Don Menu" width={32} height={32} />
+                </span>
               </div>
               <span className="text-xl font-bold text-gray-900">Don Menu</span>
             </Link>

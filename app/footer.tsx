@@ -3,7 +3,8 @@ import {
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export default function Footer() {
     return (
@@ -14,7 +15,9 @@ export default function Footer() {
                     <div className="lg:col-span-1">
                         <div className="flex items-center mb-4">
                             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center mr-3">
-                                <span className="text-white font-bold text-lg">D</span>
+                                <span className="text-white font-bold text-lg">
+                                  <Image src="/images/logo.svg" alt="Don Menu" width={32} height={32} />
+                                </span>
                             </div>
                             <span className="text-xl font-bold">Don Menu</span>
                         </div>

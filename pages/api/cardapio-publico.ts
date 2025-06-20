@@ -1,37 +1,47 @@
-import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import type { NextApiRequest, NextApiResponse } from 'next'
 
 const prisma = new PrismaClient()
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handle(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method === 'GET') {
     try {
-      const itens = await prisma.itens.findMany({
-        where: {
-          status: true // Apenas itens ativos
-        },
+      const menuItems = await prisma.menuItem.findMany({
         include: {
-          category: true
+          category: true, // Inclui a categoria de cada item
         },
-        orderBy: [
-          {
-            category: {
-              name: 'asc'
-            }
+        orderBy: {
+          category: {
+            sort_order: 'asc', // Ordena primeiro pela ordem da categoria
           },
-          {
-            name: 'asc'
-          }
-        ]
-      })
+        },
+      });
 
-      res.status(200).json(itens)
+      if (!menuItems || menuItems.length === 0) {
+        return res.status(404).json({ message: 'Nenhum item encontrado no cardápio.' });
+      }
+
+      // Agrupar itens por categoria
+      const groupedMenu = menuItems.reduce((acc, item) => {
+        const categoryName = item.category?.name || 'Sem Categoria';
+        if (!acc[categoryName]) {
+          acc[categoryName] = [];
+        }
+        acc[categoryName].push(item);
+        return acc;
+      }, {} as Record<string, typeof menuItems>);
+      
+
+      res.status(200).json(groupedMenu);
     } catch (error) {
-      console.error('Erro ao buscar cardápio público:', error)
-      res.status(500).json({ error: 'Erro interno do servidor' })
+      console.error('Erro ao buscar cardápio público:', error);
+      res.status(500).json({ error: 'Erro interno do servidor ao buscar o cardápio.' });
     }
   } else {
-    res.setHeader('Allow', ['GET'])
-    res.status(405).end(`Method ${req.method} Not Allowed`)
+    res.setHeader('Allow', ['GET']);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 } 
