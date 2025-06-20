@@ -53,6 +53,10 @@ export default function EditFichaTecnica({ isOpen, onClose, onSuccess, item }: E
     }
   }, [isOpen, item]);
 
+  useEffect(() => {
+    fetchCurrentIngredients();
+  }, [fetchCurrentIngredients]);
+
   const fetchAvailableIngredients = async () => {
     try {
       const { data, error } = await supabase

@@ -77,9 +77,11 @@ export default function Navbar() {
                           className="flex items-center space-x-2 p-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                         >
                           {session?.user?.image ? (
-                            <img
+                            <Image
                               src={session.user.image}
                               alt={session.user.name || 'Usuário'}
+                              width={32}
+                              height={32}
                               className="w-8 h-8 rounded-full"
                             />
                           ) : (
@@ -178,10 +180,12 @@ export default function Navbar() {
                   <div className="flex items-center px-4">
                     <div className="flex-shrink-0">
                       {session.user?.image ? (
-                        <img
+                        <Image
                           className="h-8 w-8 rounded-full"
                           src={session.user.image}
                           alt={`${session.user.name || 'Usuário'} avatar`}
+                          width={32}
+                          height={32}
                         />
                       ) : (
                         <UserCircleIcon className="h-8 w-8 text-gray-400" />

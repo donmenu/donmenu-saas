@@ -191,6 +191,8 @@ export default function QRCodePage() {
           </div>
         </div>
       </Card>
+
+      <p>Você pode copiar o link clicando no botão &quot;Copiar Link&quot;.</p>
     </main>
   )
 } 

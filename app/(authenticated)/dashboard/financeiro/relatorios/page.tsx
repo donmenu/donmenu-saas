@@ -72,8 +72,8 @@ export default function RelatoriosPage() {
   }
 
   useEffect(() => {
-    fetchData()
-  }, [periodo])
+    fetchData();
+  }, [fetchData]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
