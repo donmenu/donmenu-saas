@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button, TextInput, Title, Text } from '@tremor/react';
 import supabase from '../../../../lib/supabase';
 
@@ -58,9 +58,8 @@ export default function EditFichaTecnica({ isOpen, onClose, onSuccess, item }: E
     }
   };
 
-  const fetchCurrentIngredients = async () => {
+  const fetchCurrentIngredients = useCallback(async () => {
     if (!item) return;
-
     try {
       const { data, error } = await supabase
         .from('item_ingredients')
@@ -76,13 +75,12 @@ export default function EditFichaTecnica({ isOpen, onClose, onSuccess, item }: E
           )
         `)
         .eq('item_id', item.item_id);
-
       if (error) throw error;
       setCurrentIngredients((data as any) || []);
     } catch (err: any) {
       console.error('Erro ao buscar ingredientes do item:', err);
     }
-  };
+  }, [item]);
 
   useEffect(() => {
     if (isOpen) {
@@ -91,7 +89,7 @@ export default function EditFichaTecnica({ isOpen, onClose, onSuccess, item }: E
         fetchCurrentIngredients();
       }
     }
-  }, [isOpen, item]);
+  }, [isOpen, item, fetchCurrentIngredients]);
 
   useEffect(() => {
     fetchCurrentIngredients();

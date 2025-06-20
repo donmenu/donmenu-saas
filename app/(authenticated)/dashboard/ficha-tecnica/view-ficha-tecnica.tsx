@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button, Title, Text } from '@tremor/react';
 import supabase from '../../../../lib/supabase';
 
@@ -37,18 +37,10 @@ export default function ViewFichaTecnica({ isOpen, onClose, item }: ViewFichaTec
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (isOpen && item) {
-      fetchIngredients();
-    }
-  }, [isOpen, item]);
-
-  const fetchIngredients = async () => {
+  const fetchIngredients = useCallback(async () => {
     if (!item) return;
-
     setLoading(true);
     setError('');
-
     try {
       const { data, error } = await supabase
         .from('item_ingredients')
@@ -63,11 +55,9 @@ export default function ViewFichaTecnica({ isOpen, onClose, item }: ViewFichaTec
           )
         `)
         .eq('item_id', item.item_id);
-
       if (error) {
         throw error;
       }
-
       setIngredients((data as any) || []);
     } catch (err: any) {
       console.error('Erro ao buscar ingredientes:', err);
@@ -75,7 +65,13 @@ export default function ViewFichaTecnica({ isOpen, onClose, item }: ViewFichaTec
     } finally {
       setLoading(false);
     }
-  };
+  }, [item]);
+
+  useEffect(() => {
+    if (isOpen && item) {
+      fetchIngredients();
+    }
+  }, [isOpen, item, fetchIngredients]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {

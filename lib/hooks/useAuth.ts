@@ -37,25 +37,26 @@ export function useAuth() {
     }
   }
 
-  const requireAuth = (redirectTo = '/login') => {
-    useEffect(() => {
-      if (status === 'loading') return
-
-      if (!session) {
-        router.push(redirectTo)
-      }
-    }, [session, status, router, redirectTo])
-
-    return { session, status }
-  }
-
   return {
     session,
     status,
     login,
     logout,
-    requireAuth,
     isAuthenticated: !!session,
     isLoading: status === 'loading',
   }
+}
+
+export function useRequireAuth(redirectTo = '/login') {
+  const { data: session, status } = useSession()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (status === 'loading') return
+    if (!session) {
+      router.push(redirectTo)
+    }
+  }, [session, status, router, redirectTo])
+
+  return { session, status }
 } 

@@ -142,7 +142,7 @@ export default function QRCodePage() {
                     <QrCodeIcon className="w-16 h-16 text-gray-400" />
                   </div>
                   <Text className="text-gray-500">
-                    Clique em "Gerar QR Code" para criar o código
+                    Clique em &quot;Gerar QR Code&quot; para criar o código
                   </Text>
                 </div>
               )}

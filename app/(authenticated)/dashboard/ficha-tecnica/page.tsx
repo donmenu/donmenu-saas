@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, Title, Text, Button, Badge, Metric, Flex } from '@tremor/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { PlusIcon, DocumentTextIcon, CalculatorIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline'
 import Search from '../../../search'
 import { FichaTecnicaTable, AddFichaTecnica } from './index'
@@ -43,7 +43,7 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
 
   const search = searchParams.q ?? ''
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     setErrorMessage('')
 
@@ -62,7 +62,7 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
     }
 
     setLoading(false)
-  }
+  }, [search])
 
   useEffect(() => {
     fetchData()

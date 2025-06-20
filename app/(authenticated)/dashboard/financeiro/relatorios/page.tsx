@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, Title, Text, Button, Badge, Metric, Flex } from '@tremor/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { 
   ChartBarIcon, 
   DocumentArrowDownIcon,
@@ -53,7 +53,7 @@ export default function RelatoriosPage() {
     mediaDespesasDiarias: 0
   })
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
       const response = await fetch(`/api/financeiro/relatorios?periodo=${periodo}`)
@@ -69,7 +69,7 @@ export default function RelatoriosPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [periodo])
 
   useEffect(() => {
     fetchData();
