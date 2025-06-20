@@ -62,8 +62,8 @@ export default function FinanceiroPage() {
     }).format(value)
   }
 
-  const formatPercent = (value: number) => {
-    return `${value.toFixed(1)}%`
+  const formatPercent = (value?: number) => {
+    return `${(value ?? 0).toFixed(1)}%`
   }
 
   return (

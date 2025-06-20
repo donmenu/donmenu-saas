@@ -38,6 +38,7 @@ const navigation = [
       { name: 'Relatórios', href: '/dashboard/financeiro/relatorios', icon: ChartBarIcon },
     ]
   },
+  { name: 'CMV', href: '/dashboard/cmv', icon: ChartBarIcon },
   { name: 'Configurações', href: '/dashboard/settings', icon: HomeIcon },
 ]
 
@@ -72,7 +73,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className={`bg-white shadow-lg transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'}`}>
+    <div className={`bg-white shadow-lg transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} h-screen z-30 fixed`}>
       <div className="flex items-center justify-between p-4 border-b border-gray-200">
         {!collapsed && (
           <div className="flex items-center space-x-2">
