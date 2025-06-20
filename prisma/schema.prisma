@@ -26,15 +26,20 @@ model cardapios {
 }
 
 model categories {
-  category_id Int    @id @default(autoincrement())
+  category_id Int     @id @default(autoincrement())
   name        String
+  description String?
+  itens       itens[]
 }
 
 model ingredients {
-  ingredient_id Int     @id @default(autoincrement())
-  name          String
-  unit          String
-  cost_per_unit Decimal
+  ingredient_id      Int                  @id @default(autoincrement())
+  name               String
+  unit               String
+  cost_per_unit      Decimal
+  stock              Decimal?             @default(0)
+  created_at         DateTime             @default(now())
+  ficha_ingredientes ficha_ingredientes[]
 }
 
 model item_ingredients {
@@ -45,11 +50,15 @@ model item_ingredients {
 }
 
 model itens {
-  item_id     Int     @id @default(autoincrement())
-  category_id Int
-  name        String
-  description String
-  price       Decimal
+  item_id         Int               @id @default(autoincrement())
+  category_id     Int
+  name            String
+  description     String
+  price           Decimal
+  status          Boolean           @default(true)
+  created_at      DateTime          @default(now())
+  fichas_tecnicas fichas_tecnicas[]
+  category        categories        @relation(fields: [category_id], references: [category_id])
 }
 
 model itens_pricing {
@@ -107,4 +116,24 @@ model pricing_rules {
 model restaurants {
   restaurant_id Int     @id @default(autoincrement())
   name          String?
+}
+
+model fichas_tecnicas {
+  ficha_id           Int                  @id @default(autoincrement())
+  item_id            Int
+  yield              Decimal?
+  total_cost         Decimal?
+  price_suggestion   Decimal?
+  created_at         DateTime             @default(now())
+  ficha_ingredientes ficha_ingredientes[]
+  item               itens                @relation(fields: [item_id], references: [item_id], onDelete: Cascade)
+}
+
+model ficha_ingredientes {
+  id            Int             @id @default(autoincrement())
+  ficha_id      Int
+  ingredient_id Int
+  quantity      Decimal
+  ficha_tecnica fichas_tecnicas @relation(fields: [ficha_id], references: [ficha_id], onDelete: Cascade)
+  ingredient    ingredients     @relation(fields: [ingredient_id], references: [ingredient_id])
 }
