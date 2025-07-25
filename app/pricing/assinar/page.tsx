@@ -145,15 +145,31 @@ export default function AssinarPage() {
     setIsLoading(true)
     
     try {
-      // Aqui você implementaria a lógica de criação da conta
-      // Por enquanto, vamos simular um delay
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          restaurantName: formData.restaurantName,
+          phone: formData.phone
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao criar conta')
+      }
+
       // Redirecionar para o dashboard após sucesso
       window.location.href = '/dashboard'
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao criar conta:', error)
-      setErrors({ submit: 'Erro ao criar conta. Tente novamente.' })
+      setErrors({ submit: error.message || 'Erro ao criar conta. Tente novamente.' })
     } finally {
       setIsLoading(false)
     }

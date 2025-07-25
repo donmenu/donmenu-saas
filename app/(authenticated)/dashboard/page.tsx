@@ -4,6 +4,8 @@ import { Card, Metric, Text, Flex, Grid, Title, BarList } from '@tremor/react';
 import { ArrowUpIcon, ArrowDownIcon } from '@heroicons/react/24/solid';
 import Chart from './chart';
 import DashboardOnboarding from './dashboard-onboarding'
+import QuickActions from './quick-actions'
+import Insights from './insights'
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
@@ -309,6 +311,8 @@ export default function PlaygroundPage() {
     <DashboardShell>
       <main className="p-4 md:p-10 mx-auto max-w-7xl">
         <DashboardOnboarding />
+        <QuickActions />
+        <Insights />
         <div className="mb-8">
           <Grid className="gap-6" numColsSm={2} numColsLg={3}>
             {cards.map((item) => (

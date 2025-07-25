@@ -17,7 +17,8 @@ import {
   ArrowDownIcon,
   ChartBarIcon,
   BuildingStorefrontIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  RocketLaunchIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -42,6 +43,7 @@ const navigation = [
     ]
   },
   { name: 'CMV', href: '/dashboard/cmv', icon: ChartBarIcon },
+  { name: 'Roadmap', href: '/dashboard/roadmap', icon: RocketLaunchIcon },
   { name: 'Assinatura', href: '/dashboard/assinatura', icon: CreditCardIcon },
   { name: 'Configurações', href: '/dashboard/settings', icon: HomeIcon },
 ]

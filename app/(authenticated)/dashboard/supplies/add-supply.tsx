@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button, TextInput, Title, Text } from '@tremor/react';
-import supabase from '../../../../lib/supabase';
 
 interface AddSupplyProps {
   isOpen: boolean;
@@ -39,18 +38,22 @@ export default function AddSupply({ isOpen, onClose, onSuccess }: AddSupplyProps
     setError('');
 
     try {
-      const { error } = await supabase
-        .from('ingredients')
-        .insert([
-          {
-            name: name.trim(),
-            unit: unit.trim(),
-            cost_per_unit: parseFloat(costPerUnit)
-          }
-        ]);
+      const response = await fetch('/api/ingredients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name.trim(),
+          unit: unit.trim(),
+          cost_per_unit: parseFloat(costPerUnit)
+        })
+      });
 
-      if (error) {
-        throw error;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Erro ao adicionar insumo');
       }
 
       // Limpar formulário

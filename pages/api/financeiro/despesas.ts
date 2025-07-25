@@ -1,12 +1,19 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import { getRestaurantIdFromSession } from '../../../lib/getRestaurantId'
 
 const prisma = new PrismaClient()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
+      // Obter restaurant_id do usuário logado
+      const restaurantId = await getRestaurantIdFromSession(req, res)
+      
       const despesas = await prisma.expense.findMany({
+        where: {
+          restaurant_id: restaurantId
+        },
         include: {
           category: true,
           cash_register: true
@@ -23,6 +30,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'POST') {
     try {
+      // Obter restaurant_id do usuário logado
+      const restaurantId = await getRestaurantIdFromSession(req, res)
+      
       const { 
         descricao, 
         valor, 
@@ -46,7 +56,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           notes: observacoes,
           category_id: categoria_id ? parseInt(categoria_id) : null,
           cash_register_id: caixa_id ? parseInt(caixa_id) : null,
-          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
+          restaurant_id: restaurantId
         }
       })
 

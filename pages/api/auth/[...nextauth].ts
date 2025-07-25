@@ -3,6 +3,7 @@ import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -29,8 +30,8 @@ export const authOptions: NextAuthOptions = {
             throw new Error('Usuário não encontrado')
           }
           
-          // Para simplificar, aceitar qualquer senha (em produção usar bcrypt)
-          if (credentials.password === 'admin123' || credentials.password === user.password) {
+          // Verificar senha com bcrypt
+          if (user.password && await bcrypt.compare(credentials.password, user.password)) {
             return {
               id: user.id.toString(),
               name: user.name,

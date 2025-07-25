@@ -1,11 +1,15 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 import { PrismaClient } from '@prisma/client'
+import { getRestaurantIdFromSession } from '../../../lib/getRestaurantId'
 
 const prisma = new PrismaClient()
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
+      // Obter restaurant_id do usuário logado
+      const restaurantId = await getRestaurantIdFromSession(req, res)
+      
       const { tipo } = req.query
 
       const where = tipo ? { type: tipo as string } : {}
@@ -13,7 +17,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const categorias = await prisma.financialCategory.findMany({
         where: {
           ...where,
-          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
+          restaurant_id: restaurantId
         },
         orderBy: {
           name: 'asc'
@@ -27,6 +31,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'POST') {
     try {
+      // Obter restaurant_id do usuário logado
+      const restaurantId = await getRestaurantIdFromSession(req, res)
+      
       const { nome, tipo, descricao, cor } = req.body
 
       const novaCategoria = await prisma.financialCategory.create({
@@ -35,7 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           type: tipo,
           description: descricao,
           color: cor,
-          restaurant_id: 1 // TODO: Pegar do contexto de autenticação
+          restaurant_id: restaurantId
         }
       })
 
