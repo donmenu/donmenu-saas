@@ -27,33 +27,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Buscar receitas e despesas do período
-      const receitas = await prisma.receitas.findMany({
+      const receitas = await prisma.revenue.findMany({
         where: {
-          data_receita: {
+          revenue_date: {
             gte: dataInicio,
             lte: hoje
           }
         },
         include: {
-          categoria: true
+          category: true
         }
       })
 
-      const despesas = await prisma.despesas.findMany({
+      const despesas = await prisma.expense.findMany({
         where: {
-          data_despesa: {
+          expense_date: {
             gte: dataInicio,
             lte: hoje
           }
         },
         include: {
-          categoria: true
+          category: true
         }
       })
 
       // Calcular métricas gerais
-      const totalReceitas = receitas.reduce((sum: number, r: any) => sum + Number(r.valor), 0)
-      const totalDespesas = despesas.reduce((sum: number, d: any) => sum + Number(d.valor), 0)
+      const totalReceitas = receitas.reduce((sum: number, r: any) => sum + Number(r.amount), 0)
+      const totalDespesas = despesas.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
       const lucroTotal = totalReceitas - totalDespesas
       const margemLucro = totalReceitas > 0 ? (lucroTotal / totalReceitas) * 100 : 0
 
@@ -64,20 +64,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Agrupar por categoria
       const receitasPorCategoria = receitas.reduce((acc: any, r: any) => {
-        const categoria = r.categoria?.nome || 'Sem categoria'
+        const categoria = r.category?.name || 'Sem categoria'
         if (!acc[categoria]) {
           acc[categoria] = { nome: categoria, valor: 0, percentual: 0 }
         }
-        acc[categoria].valor += Number(r.valor)
+        acc[categoria].valor += Number(r.amount)
         return acc
       }, {})
 
       const despesasPorCategoria = despesas.reduce((acc: any, d: any) => {
-        const categoria = d.categoria?.nome || 'Sem categoria'
+        const categoria = d.category?.name || 'Sem categoria'
         if (!acc[categoria]) {
           acc[categoria] = { nome: categoria, valor: 0, percentual: 0 }
         }
-        acc[categoria].valor += Number(d.valor)
+        acc[categoria].valor += Number(d.amount)
         return acc
       }, {})
 

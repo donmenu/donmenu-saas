@@ -11,9 +11,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       const { status } = req.body
 
-      const pedido = await prisma.pedidos.update({
+      const pedido = await prisma.sale.update({
         where: {
-          pedido_id: pedidoId
+          id: pedidoId
         },
         data: {
           status

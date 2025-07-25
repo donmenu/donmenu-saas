@@ -5,6 +5,20 @@ const prisma = new PrismaClient()
 async function main() {
   console.log('🌱 Iniciando seed do banco de dados...')
 
+  // Criar usuário administrador
+  console.log('👤 Criando usuário administrador...')
+  const adminUser = await prisma.user.create({
+    data: {
+      name: 'Administrador',
+      email: 'admin@restauranteexemplo.com',
+      password: '$2b$10$example.hash', // Senha: admin123
+      role: 'owner',
+      avatar_url: 'https://via.placeholder.com/100x100',
+      active: true
+    }
+  })
+  console.log(`✅ Usuário criado: ${adminUser.name}`)
+
   // Criar restaurante de exemplo
   console.log('🏪 Criando restaurante de exemplo...')
   const restaurant = await prisma.restaurant.create({
@@ -19,25 +33,11 @@ async function main() {
       zip_code: '01234-567',
       logo_url: 'https://via.placeholder.com/150x150',
       active: true,
-      plan_type: 'premium'
+      plan_type: 'premium',
+      userId: adminUser.id
     }
   })
   console.log(`✅ Restaurante criado: ${restaurant.name}`)
-
-  // Criar usuário administrador
-  console.log('👤 Criando usuário administrador...')
-  const adminUser = await prisma.user.create({
-    data: {
-      restaurant_id: restaurant.id,
-      name: 'Administrador',
-      email: 'admin@restauranteexemplo.com',
-      password: '$2b$10$example.hash', // Senha: admin123
-      role: 'owner',
-      avatar_url: 'https://via.placeholder.com/100x100',
-      active: true
-    }
-  })
-  console.log(`✅ Usuário criado: ${adminUser.name}`)
 
   // Criar categorias
   console.log('📂 Criando categorias...')

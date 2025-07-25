@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,538 +7,454 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ========================================
-// TABELAS PRINCIPAIS - MULTI-TENANCY
-// ========================================
-
 model Restaurant {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  cnpj        String?  @unique @db.VarChar(18)
-  email       String   @db.VarChar(255)
-  phone       String?  @db.VarChar(20)
-  address     String?  @db.Text
-  city        String?  @db.VarChar(100)
-  state       String?  @db.VarChar(2)
-  zip_code    String?  @db.VarChar(10)
-  logo_url    String?  @db.VarChar(500)
-  active      Boolean  @default(true)
-  plan_type   String   @default("free") @db.VarChar(20) // free, basic, premium
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  // Relacionamentos
-  users       User[]
-  categories  Category[]
-  ingredients Ingredient[]
-  recipes     Recipe[]
-  menus       Menu[]
-  menu_items  MenuItem[]
-  combos      Combo[]
-  combo_items ComboItem[]
-  sales       Sale[]
-  sale_items  SaleItem[]
-  ingredient_prices IngredientPrice[]
-  recipe_ingredients RecipeIngredient[]
-  cash_registers CashRegister[]
+  id                   Int                 @id @default(autoincrement())
+  name                 String              @db.VarChar(255)
+  active               Boolean             @default(true)
+  address              String?
+  city                 String?             @db.VarChar(100)
+  cnpj                 String?             @unique @db.VarChar(18)
+  created_at           DateTime            @default(now())
+  email                String              @db.VarChar(255)
+  logo_url             String?             @db.VarChar(500)
+  phone                String?             @db.VarChar(20)
+  plan_type            String              @default("free") @db.VarChar(20)
+  state                String?             @db.VarChar(2)
+  updated_at           DateTime            @updatedAt
+  zip_code             String?             @db.VarChar(10)
+  userId               Int
+  user                 User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cash_registers       CashRegister[]
   financial_categories FinancialCategory[]
-  revenues    Revenue[]
-  expenses    Expense[]
-  orders      Order[]
-  order_items OrderItem[]
+  categories           Category[]
+  combo_items          ComboItem[]
+  combos               Combo[]
+  expenses             Expense[]
+  ingredient_prices    IngredientPrice[]
+  ingredients          Ingredient[]
+  order_items          OrderItem[]
+  menu_items           MenuItem[]
+  menus                Menu[]
+  orders               Order[]
+  revenues             Revenue[]
+  recipe_ingredients   RecipeIngredient[]
+  recipes              Recipe[]
+  sale_items           SaleItem[]
+  sales                Sale[]
 
   @@map("restaurants")
 }
 
 model User {
-  id            Int         @id @default(autoincrement())
-  restaurant_id Int
-  name          String      @db.VarChar(255)
-  email         String      @unique @db.VarChar(255)
-  password      String?     @db.VarChar(255) // null se autenticação via Google
-  google_id     String?     @unique @db.VarChar(255)
-  role          String      @default("user") @db.VarChar(20) // owner, manager, user
-  avatar_url    String?     @db.VarChar(500)
-  active        Boolean     @default(true)
+  id            Int        @id @default(autoincrement())
+  name          String     @db.VarChar(255)
+  email         String     @unique @db.VarChar(255)
+  active        Boolean    @default(true)
+  avatar_url    String?    @db.VarChar(500)
+  created_at    DateTime   @default(now())
+  google_id     String?    @unique @db.VarChar(255)
   last_login    DateTime?
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
+  password      String?    @db.VarChar(255)
+  role          String     @default("user") @db.VarChar(20)
+  phone         String?    @db.VarChar(20)
+  address       String?    @db.VarChar(500)
+  bio           String?    @db.Text
+  updated_at    DateTime   @updatedAt
+  restaurants   Restaurant[]
 
-  // Relacionamentos
-  restaurant    Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-
-  @@map("users")
-  @@index([restaurant_id])
   @@index([email])
   @@index([google_id])
+  @@map("users")
 }
-
-// ========================================
-// CATEGORIAS E CLASSIFICAÇÃO
-// ========================================
 
 model Category {
-  id            Int      @id @default(autoincrement())
+  name          String     @db.VarChar(100)
+  description   String?
+  active        Boolean    @default(true)
+  color         String?    @db.VarChar(7)
+  created_at    DateTime   @default(now())
+  icon          String?    @db.VarChar(50)
+  id            Int        @id @default(autoincrement())
   restaurant_id Int
-  name          String   @db.VarChar(100)
-  description   String?  @db.Text
-  color         String?  @db.VarChar(7) // hex color
-  icon          String?  @db.VarChar(50)
-  active        Boolean  @default(true)
-  sort_order    Int      @default(0)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  // Relacionamentos
+  sort_order    Int        @default(0)
+  updated_at    DateTime   @updatedAt
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  recipes       Recipe[]
   menu_items    MenuItem[]
+  recipes       Recipe[]
 
   @@unique([restaurant_id, name])
-  @@map("categories")
   @@index([restaurant_id])
   @@index([restaurant_id, active])
+  @@map("categories")
 }
 
-// ========================================
-// INSUMOS E INGREDIENTES
-// ========================================
-
 model Ingredient {
-  id              Int      @id @default(autoincrement())
-  restaurant_id   Int
-  name            String   @db.VarChar(255)
-  description     String?  @db.Text
-  unit            String   @db.VarChar(20) // kg, g, l, ml, un, pct
-  cost_per_unit   Decimal  @db.Decimal(10, 2)
-  supplier        String?  @db.VarChar(255)
-  min_stock       Decimal? @db.Decimal(10, 2)
-  current_stock   Decimal  @default(0) @db.Decimal(10, 2)
-  active          Boolean  @default(true)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant      Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  name               String             @db.VarChar(255)
+  unit               String             @db.VarChar(20)
+  cost_per_unit      Decimal            @db.Decimal(10, 2)
+  created_at         DateTime           @default(now())
+  active             Boolean            @default(true)
+  current_stock      Decimal            @default(0) @db.Decimal(10, 2)
+  description        String?
+  id                 Int                @id @default(autoincrement())
+  min_stock          Decimal?           @db.Decimal(10, 2)
+  restaurant_id      Int
+  supplier           String?            @db.VarChar(255)
+  updated_at         DateTime           @updatedAt
+  prices             IngredientPrice[]
+  restaurant         Restaurant         @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
   recipe_ingredients RecipeIngredient[]
-  prices          IngredientPrice[]
 
   @@unique([restaurant_id, name])
-  @@map("ingredients")
   @@index([restaurant_id])
   @@index([restaurant_id, active])
   @@index([restaurant_id, name])
+  @@map("ingredients")
 }
 
 model IngredientPrice {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   restaurant_id Int
   ingredient_id Int
-  price         Decimal  @db.Decimal(10, 2)
-  supplier      String?  @db.VarChar(255)
-  valid_from    DateTime @default(now())
+  price         Decimal    @db.Decimal(10, 2)
+  supplier      String?    @db.VarChar(255)
+  valid_from    DateTime   @default(now())
   valid_to      DateTime?
-  created_at    DateTime @default(now())
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  created_at    DateTime   @default(now())
   ingredient    Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
-  @@map("ingredient_prices")
   @@index([restaurant_id, ingredient_id])
   @@index([ingredient_id, valid_from])
+  @@map("ingredient_prices")
 }
 
-// ========================================
-// FICHAS TÉCNICAS E RECEITAS
-// ========================================
-
 model Recipe {
-  id                Int      @id @default(autoincrement())
-  restaurant_id     Int
-  category_id       Int?
-  name              String   @db.VarChar(255)
-  description       String?  @db.Text
-  yield_quantity    Decimal  @db.Decimal(10, 2) // quantidade que a receita produz
-  yield_unit        String   @db.VarChar(20) // porção, unidade, kg, etc.
-  preparation_time  Int?     // em minutos
-  difficulty        String?  @db.VarChar(20) // fácil, médio, difícil
-  instructions      String?  @db.Text
-  image_url         String?  @db.VarChar(500)
-  active            Boolean  @default(true)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-
-  // Campos calculados (não persistidos)
-  total_cost        Decimal? @db.Decimal(10, 2) // custo total da receita
-  cost_per_yield    Decimal? @db.Decimal(10, 2) // custo por porção
-
-  // Relacionamentos
-  restaurant        Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  category          Category? @relation(fields: [category_id], references: [id])
-  ingredients       RecipeIngredient[]
-  menu_items        MenuItem[]
+  id               Int                @id @default(autoincrement())
+  restaurant_id    Int
+  category_id      Int?
+  name             String             @db.VarChar(255)
+  description      String?
+  yield_quantity   Decimal            @db.Decimal(10, 2)
+  yield_unit       String             @db.VarChar(20)
+  preparation_time Int?
+  difficulty       String?            @db.VarChar(20)
+  instructions     String?
+  image_url        String?            @db.VarChar(500)
+  active           Boolean            @default(true)
+  created_at       DateTime           @default(now())
+  updated_at       DateTime           @updatedAt
+  total_cost       Decimal?           @db.Decimal(10, 2)
+  cost_per_yield   Decimal?           @db.Decimal(10, 2)
+  menu_items       MenuItem[]
+  ingredients      RecipeIngredient[]
+  category         Category?          @relation(fields: [category_id], references: [id])
+  restaurant       Restaurant         @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
   @@unique([restaurant_id, name])
-  @@map("recipes")
   @@index([restaurant_id])
   @@index([restaurant_id, category_id])
   @@index([restaurant_id, active])
+  @@map("recipes")
 }
 
 model RecipeIngredient {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   restaurant_id Int
   recipe_id     Int
   ingredient_id Int
-  quantity      Decimal  @db.Decimal(10, 4) // quantidade necessária
-  unit          String   @db.VarChar(20) // unidade da quantidade
-  cost          Decimal? @db.Decimal(10, 2) // custo calculado (quantity * ingredient.cost_per_unit)
-  notes         String?  @db.Text
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  recipe        Recipe     @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+  quantity      Decimal    @db.Decimal(10, 4)
+  unit          String     @db.VarChar(20)
+  cost          Decimal?   @db.Decimal(10, 2)
+  notes         String?
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
   ingredient    Ingredient @relation(fields: [ingredient_id], references: [id], onDelete: Cascade)
+  recipe        Recipe     @relation(fields: [recipe_id], references: [id], onDelete: Cascade)
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
   @@unique([restaurant_id, recipe_id, ingredient_id])
-  @@map("recipe_ingredients")
   @@index([restaurant_id, recipe_id])
   @@index([ingredient_id])
+  @@map("recipe_ingredients")
 }
 
-// ========================================
-// CARDÁPIOS E ITENS
-// ========================================
-
 model Menu {
-  id            Int      @id @default(autoincrement())
   restaurant_id Int
-  name          String   @db.VarChar(255)
-  description   String?  @db.Text
-  type          String   @db.VarChar(50) // almoço, jantar, delivery, sobremesas, etc.
-  active        Boolean  @default(true)
-  sort_order    Int      @default(0)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  name          String     @db.VarChar(255)
+  description   String?
+  active        Boolean    @default(true)
+  created_at    DateTime   @default(now())
+  id            Int        @id @default(autoincrement())
+  sort_order    Int        @default(0)
+  type          String     @db.VarChar(50)
+  updated_at    DateTime   @updatedAt
   items         MenuItem[]
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
   @@unique([restaurant_id, name])
-  @@map("menus")
   @@index([restaurant_id])
   @@index([restaurant_id, active])
+  @@map("menus")
 }
 
 model MenuItem {
-  id                Int      @id @default(autoincrement())
-  restaurant_id     Int
-  menu_id           Int
-  recipe_id         Int?
-  category_id       Int?
-  name              String   @db.VarChar(255)
-  description       String?  @db.Text
-  price             Decimal  @db.Decimal(10, 2)
-  suggested_price   Decimal? @db.Decimal(10, 2) // preço sugerido pelo sistema
-  desired_margin    Decimal? @db.Decimal(5, 2) // margem desejada em %
-  cost_price        Decimal? @db.Decimal(10, 2) // custo calculado
-  gross_profit      Decimal? @db.Decimal(10, 2) // lucro bruto calculado
-  actual_margin     Decimal? @db.Decimal(5, 2) // margem real calculada
-  manual_pricing    Boolean  @default(false) // se o preço foi definido manualmente
-  image_url         String?  @db.VarChar(500)
-  active            Boolean  @default(true)
-  visible           Boolean  @default(true)
-  sort_order        Int      @default(0)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant        Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  menu              Menu       @relation(fields: [menu_id], references: [id], onDelete: Cascade)
-  recipe            Recipe?    @relation(fields: [recipe_id], references: [id])
-  category          Category?  @relation(fields: [category_id], references: [id])
-  combo_items       ComboItem[]
-  sale_items        SaleItem[]
-  order_items       OrderItem[]
+  id              Int         @id @default(autoincrement())
+  restaurant_id   Int
+  menu_id         Int
+  recipe_id       Int?
+  category_id     Int?
+  name            String      @db.VarChar(255)
+  description     String?
+  price           Decimal     @db.Decimal(10, 2)
+  suggested_price Decimal?    @db.Decimal(10, 2)
+  desired_margin  Decimal?    @db.Decimal(5, 2)
+  cost_price      Decimal?    @db.Decimal(10, 2)
+  gross_profit    Decimal?    @db.Decimal(10, 2)
+  actual_margin   Decimal?    @db.Decimal(5, 2)
+  manual_pricing  Boolean     @default(false)
+  image_url       String?     @db.VarChar(500)
+  active          Boolean     @default(true)
+  visible         Boolean     @default(true)
+  sort_order      Int         @default(0)
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  combo_items     ComboItem[]
+  order_items     OrderItem[]
+  category        Category?   @relation(fields: [category_id], references: [id])
+  menu            Menu        @relation(fields: [menu_id], references: [id], onDelete: Cascade)
+  recipe          Recipe?     @relation(fields: [recipe_id], references: [id])
+  restaurant      Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  sale_items      SaleItem[]
 
   @@unique([restaurant_id, menu_id, name])
-  @@map("menu_items")
   @@index([restaurant_id, menu_id])
   @@index([restaurant_id, active])
   @@index([restaurant_id, visible])
   @@index([recipe_id])
   @@index([category_id])
+  @@map("menu_items")
 }
 
-// ========================================
-// COMBOS E PROMOÇÕES
-// ========================================
-
 model Combo {
-  id            Int      @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   restaurant_id Int
-  name          String   @db.VarChar(255)
-  description   String?  @db.Text
-  price         Decimal  @db.Decimal(10, 2)
-  discount      Decimal? @db.Decimal(5, 2) // desconto em %
-  active        Boolean  @default(true)
+  name          String      @db.VarChar(255)
+  description   String?
+  price         Decimal     @db.Decimal(10, 2)
+  discount      Decimal?    @db.Decimal(5, 2)
+  active        Boolean     @default(true)
   valid_from    DateTime?
   valid_to      DateTime?
-  image_url     String?  @db.VarChar(500)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  image_url     String?     @db.VarChar(500)
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @updatedAt
   items         ComboItem[]
+  restaurant    Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
   sale_items    SaleItem[]
 
   @@unique([restaurant_id, name])
-  @@map("combos")
   @@index([restaurant_id])
   @@index([restaurant_id, active])
+  @@map("combos")
 }
 
 model ComboItem {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   restaurant_id Int
   combo_id      Int
   menu_item_id  Int
-  quantity      Int      @default(1)
-  discount      Decimal? @db.Decimal(5, 2) // desconto específico do item no combo
-  created_at    DateTime @default(now())
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  quantity      Int        @default(1)
+  discount      Decimal?   @db.Decimal(5, 2)
+  created_at    DateTime   @default(now())
   combo         Combo      @relation(fields: [combo_id], references: [id], onDelete: Cascade)
   menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id], onDelete: Cascade)
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
   @@unique([restaurant_id, combo_id, menu_item_id])
-  @@map("combo_items")
   @@index([restaurant_id, combo_id])
   @@index([menu_item_id])
+  @@map("combo_items")
 }
 
-// ========================================
-// VENDAS E HISTÓRICO
-// ========================================
-
 model Sale {
-  id            Int      @id @default(autoincrement())
-  restaurant_id Int
-  sale_number   String   @db.VarChar(50)
-  customer_name String?  @db.VarChar(255)
-  customer_phone String? @db.VarChar(20)
-  subtotal      Decimal  @db.Decimal(10, 2)
-  discount      Decimal  @default(0) @db.Decimal(10, 2)
-  total         Decimal  @db.Decimal(10, 2)
-  payment_method String  @db.VarChar(50) // dinheiro, cartão, pix, etc.
-  status        String   @default("completed") @db.VarChar(20) // pending, completed, cancelled
-  notes         String?  @db.Text
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  items         SaleItem[]
+  id             Int        @id @default(autoincrement())
+  restaurant_id  Int
+  sale_number    String     @db.VarChar(50)
+  customer_name  String?    @db.VarChar(255)
+  customer_phone String?    @db.VarChar(20)
+  subtotal       Decimal    @db.Decimal(10, 2)
+  discount       Decimal    @default(0) @db.Decimal(10, 2)
+  total          Decimal    @db.Decimal(10, 2)
+  payment_method String     @db.VarChar(50)
+  status         String     @default("completed") @db.VarChar(20)
+  notes          String?
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  items          SaleItem[]
+  restaurant     Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
   @@unique([restaurant_id, sale_number])
-  @@map("sales")
   @@index([restaurant_id])
   @@index([restaurant_id, created_at])
   @@index([restaurant_id, status])
+  @@map("sales")
 }
 
 model SaleItem {
-  id            Int      @id @default(autoincrement())
+  id            Int        @id @default(autoincrement())
   restaurant_id Int
   sale_id       Int
   menu_item_id  Int
   combo_id      Int?
   quantity      Int
-  unit_price    Decimal  @db.Decimal(10, 2)
-  total_price   Decimal  @db.Decimal(10, 2)
-  cost_price    Decimal? @db.Decimal(10, 2)
-  gross_profit  Decimal? @db.Decimal(10, 2)
-  margin        Decimal? @db.Decimal(5, 2)
-  created_at    DateTime @default(now())
-
-  // Relacionamentos
+  unit_price    Decimal    @db.Decimal(10, 2)
+  total_price   Decimal    @db.Decimal(10, 2)
+  cost_price    Decimal?   @db.Decimal(10, 2)
+  gross_profit  Decimal?   @db.Decimal(10, 2)
+  margin        Decimal?   @db.Decimal(5, 2)
+  created_at    DateTime   @default(now())
+  combo         Combo?     @relation(fields: [combo_id], references: [id])
+  menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id])
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
   sale          Sale       @relation(fields: [sale_id], references: [id], onDelete: Cascade)
-  menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id])
-  combo         Combo?     @relation(fields: [combo_id], references: [id])
 
-  @@map("sale_items")
   @@index([restaurant_id, sale_id])
   @@index([menu_item_id])
   @@index([combo_id])
   @@index([restaurant_id, created_at])
+  @@map("sale_items")
 }
 
-// ========================================
-// SISTEMA FINANCEIRO
-// ========================================
-
 model CashRegister {
-  id            Int      @id @default(autoincrement()) @map("caixa_id")
-  restaurant_id Int
-  opening_date  DateTime @default(now()) @map("data_abertura")
-  closing_date  DateTime? @map("data_fechamento")
-  initial_amount Decimal @default(0) @db.Decimal(10, 2) @map("valor_inicial")
-  final_amount  Decimal? @db.Decimal(10, 2) @map("valor_final")
-  notes         String?  @db.Text @map("observacoes")
-  status        String   @default("aberto") @db.VarChar(20) // aberto, fechado
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  id             Int        @id @default(autoincrement()) @map("caixa_id")
+  opening_date   DateTime   @default(now()) @map("data_abertura")
+  closing_date   DateTime?  @map("data_fechamento")
+  initial_amount Decimal    @default(0) @map("valor_inicial") @db.Decimal(10, 2)
+  final_amount   Decimal?   @map("valor_final") @db.Decimal(10, 2)
+  notes          String?    @map("observacoes")
+  status         String     @default("aberto") @db.VarChar(20)
+  created_at     DateTime   @default(now())
+  updated_at     DateTime   @updatedAt
+  restaurant_id  Int
+  restaurant     Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  expenses       Expense[]
+  revenues       Revenue[]
 
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  revenues      Revenue[]
-  expenses      Expense[]
-
-  @@map("caixa")
   @@index([restaurant_id])
   @@index([restaurant_id, status])
   @@index([restaurant_id, opening_date])
+  @@map("caixa")
 }
 
 model FinancialCategory {
-  id            Int      @id @default(autoincrement()) @map("categoria_id")
+  id            Int        @id @default(autoincrement()) @map("categoria_id")
+  name          String     @map("nome") @db.VarChar(100)
+  type          String     @map("tipo") @db.VarChar(20)
+  description   String?    @map("descricao")
+  color         String?    @map("cor") @db.VarChar(7)
+  created_at    DateTime   @default(now())
   restaurant_id Int
-  name          String   @db.VarChar(100) @map("nome")
-  type          String   @db.VarChar(20) @map("tipo") // receita, despesa
-  description   String?  @db.Text @map("descricao")
-  color         String?  @db.VarChar(7) @map("cor") // hex color
-  created_at    DateTime @default(now())
-
-  // Relacionamentos
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  revenues      Revenue[]
   expenses      Expense[]
+  revenues      Revenue[]
 
   @@unique([restaurant_id, name, type])
-  @@map("categorias_financeiras")
   @@index([restaurant_id])
   @@index([restaurant_id, type])
+  @@map("categorias_financeiras")
 }
 
 model Revenue {
-  id            Int      @id @default(autoincrement()) @map("receita_id")
-  restaurant_id Int
-  cash_register_id Int? @map("caixa_id")
-  category_id   Int? @map("categoria_id")
-  order_id      Int? @map("pedido_id")
-  description   String   @db.Text @map("descricao")
-  amount        Decimal  @db.Decimal(10, 2) @map("valor")
-  revenue_date  DateTime @default(now()) @map("data_receita")
-  payment_method String? @db.VarChar(50) @map("forma_pagamento")
-  notes         String?  @db.Text @map("observacoes")
-  created_at    DateTime @default(now())
+  id               Int                @id @default(autoincrement()) @map("receita_id")
+  cash_register_id Int?               @map("caixa_id")
+  category_id      Int?               @map("categoria_id")
+  order_id         Int?               @map("pedido_id")
+  description      String             @map("descricao")
+  amount           Decimal            @map("valor") @db.Decimal(10, 2)
+  revenue_date     DateTime           @default(now()) @map("data_receita")
+  payment_method   String?            @map("forma_pagamento") @db.VarChar(50)
+  notes            String?            @map("observacoes")
+  created_at       DateTime           @default(now())
+  restaurant_id    Int
+  cash_register    CashRegister?      @relation(fields: [cash_register_id], references: [id])
+  category         FinancialCategory? @relation(fields: [category_id], references: [id])
+  order            Order?             @relation(fields: [order_id], references: [id])
+  restaurant       Restaurant         @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  cash_register CashRegister? @relation(fields: [cash_register_id], references: [id])
-  category      FinancialCategory? @relation(fields: [category_id], references: [id])
-  order         Order? @relation(fields: [order_id], references: [id])
-
-  @@map("receitas")
   @@index([restaurant_id])
   @@index([restaurant_id, revenue_date])
   @@index([restaurant_id, category_id])
   @@index([cash_register_id])
   @@index([order_id])
+  @@map("receitas")
 }
 
 model Expense {
-  id            Int      @id @default(autoincrement()) @map("despesa_id")
-  restaurant_id Int
-  cash_register_id Int? @map("caixa_id")
-  category_id   Int? @map("categoria_id")
-  description   String   @db.Text @map("descricao")
-  amount        Decimal  @db.Decimal(10, 2) @map("valor")
-  expense_date  DateTime @default(now()) @map("data_despesa")
-  payment_method String? @db.VarChar(50) @map("forma_pagamento")
-  supplier      String?  @db.VarChar(255) @map("fornecedor")
-  invoice_number String? @db.VarChar(100) @map("nota_fiscal")
-  notes         String?  @db.Text @map("observacoes")
-  created_at    DateTime @default(now())
+  id               Int                @id @default(autoincrement()) @map("despesa_id")
+  cash_register_id Int?               @map("caixa_id")
+  category_id      Int?               @map("categoria_id")
+  description      String             @map("descricao")
+  amount           Decimal            @map("valor") @db.Decimal(10, 2)
+  expense_date     DateTime           @default(now()) @map("data_despesa")
+  payment_method   String?            @map("forma_pagamento") @db.VarChar(50)
+  supplier         String?            @map("fornecedor") @db.VarChar(255)
+  invoice_number   String?            @map("nota_fiscal") @db.VarChar(100)
+  notes            String?            @map("observacoes")
+  created_at       DateTime           @default(now())
+  restaurant_id    Int
+  cash_register    CashRegister?      @relation(fields: [cash_register_id], references: [id])
+  category         FinancialCategory? @relation(fields: [category_id], references: [id])
+  restaurant       Restaurant         @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  cash_register CashRegister? @relation(fields: [cash_register_id], references: [id])
-  category      FinancialCategory? @relation(fields: [category_id], references: [id])
-
-  @@map("despesas")
   @@index([restaurant_id])
   @@index([restaurant_id, expense_date])
   @@index([restaurant_id, category_id])
   @@index([cash_register_id])
+  @@map("despesas")
 }
 
-// ========================================
-// SISTEMA DE PEDIDOS
-// ========================================
-
 model Order {
-  id            Int      @id @default(autoincrement()) @map("pedido_id")
-  restaurant_id Int
-  order_number  String   @db.VarChar(50) @map("numero_pedido")
-  customer_name String?  @db.VarChar(255) @map("nome_cliente")
-  customer_phone String? @db.VarChar(20) @map("telefone_cliente")
-  table_number  String?  @db.VarChar(10) @map("numero_mesa")
-  status        String   @default("pendente") @db.VarChar(20) // pendente, preparando, pronto, entregue, cancelado
-  subtotal      Decimal  @db.Decimal(10, 2) @map("subtotal")
-  discount      Decimal  @default(0) @db.Decimal(10, 2) @map("desconto")
-  total         Decimal  @db.Decimal(10, 2) @map("total")
-  payment_method String? @db.VarChar(50) @map("forma_pagamento")
-  notes         String?  @db.Text @map("observacoes")
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  items         OrderItem[]
-  revenues      Revenue[]
+  id             Int         @id @default(autoincrement()) @map("pedido_id")
+  status         String      @default("pendente") @db.VarChar(20)
+  total          Decimal     @map("total") @db.Decimal(10, 2)
+  notes          String?     @map("observacoes")
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  discount       Decimal     @default(0) @map("desconto") @db.Decimal(10, 2)
+  payment_method String?     @map("forma_pagamento") @db.VarChar(50)
+  customer_name  String?     @map("nome_cliente") @db.VarChar(255)
+  table_number   String?     @map("numero_mesa") @db.VarChar(10)
+  order_number   String      @map("numero_pedido") @db.VarChar(50)
+  restaurant_id  Int
+  subtotal       Decimal     @map("subtotal") @db.Decimal(10, 2)
+  customer_phone String?     @map("telefone_cliente") @db.VarChar(20)
+  items          OrderItem[]
+  restaurant     Restaurant  @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
+  revenues       Revenue[]
 
   @@unique([restaurant_id, order_number])
-  @@map("pedidos")
   @@index([restaurant_id])
   @@index([restaurant_id, status])
   @@index([restaurant_id, created_at])
+  @@map("pedidos")
 }
 
 model OrderItem {
-  id            Int      @id @default(autoincrement()) @map("item_pedido_id")
+  id            Int        @id @default(autoincrement()) @map("item_pedido_id")
   restaurant_id Int
-  order_id      Int      @map("pedido_id")
-  menu_item_id  Int      @map("item_cardapio_id")
-  quantity      Int      @map("quantidade")
-  unit_price    Decimal  @db.Decimal(10, 2) @map("preco_unitario")
-  total_price   Decimal  @db.Decimal(10, 2) @map("preco_total")
-  notes         String?  @db.Text @map("observacoes")
-  created_at    DateTime @default(now())
-
-  // Relacionamentos
-  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
-  order         Order      @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_id      Int        @map("pedido_id")
+  menu_item_id  Int        @map("item_cardapio_id")
+  quantity      Int        @map("quantidade")
+  unit_price    Decimal    @map("preco_unitario") @db.Decimal(10, 2)
+  total_price   Decimal    @map("preco_total") @db.Decimal(10, 2)
+  notes         String?    @map("observacoes")
+  created_at    DateTime   @default(now())
   menu_item     MenuItem   @relation(fields: [menu_item_id], references: [id])
+  order         Order      @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
 
-  @@map("itens_pedido")
   @@index([restaurant_id, order_id])
   @@index([menu_item_id])
+  @@map("itens_pedido")
 }
-
-// ========================================
-// ÍNDICES ADICIONAIS PARA PERFORMANCE
-// ========================================
-
-// Índices compostos para consultas frequentes
-// @@index([restaurant_id, active, visible]) // para listagem de itens ativos
-// @@index([restaurant_id, category_id, active]) // para filtros por categoria
-// @@index([restaurant_id, created_at]) // para relatórios por período
-// @@index([restaurant_id, payment_method, created_at]) // para relatórios financeiros

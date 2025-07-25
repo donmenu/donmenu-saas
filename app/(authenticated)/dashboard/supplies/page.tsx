@@ -7,6 +7,7 @@ import Search from '../../../search'
 import SuppliesTable from './table-cardapio'
 import AddSupply from './add-supply'
 import type { Ingredient } from '../../../../types/ingredient'
+import DashboardShell from '../DashboardShell';
 
 export default function IndexPage({ searchParams }: { searchParams: { q: string } }) {
   const [ingredients, setIngredients] = useState<Ingredient[]>([])
@@ -49,7 +50,7 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
   const averageCost = totalIngredients > 0 ? totalCost / totalIngredients : 0
 
   return (
-    <main className="p-4 md:p-10 mx-auto max-w-7xl">
+    <DashboardShell>
       {/* Header com métricas */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -156,6 +157,6 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={handleAddSuccess}
       />
-    </main>
+    </DashboardShell>
   )
 }

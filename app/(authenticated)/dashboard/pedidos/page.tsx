@@ -4,6 +4,7 @@ import { Card, Title, Text, Button, Badge, Metric, Flex } from '@tremor/react'
 import { useEffect, useState } from 'react'
 import { ClockIcon, CheckCircleIcon, XCircleIcon, EyeIcon } from '@heroicons/react/24/outline'
 import PedidosTable from './table-pedidos'
+import DashboardShell from '../DashboardShell';
 
 interface PedidoItem {
   id: number
@@ -112,7 +113,7 @@ export default function PedidosPage() {
   }
 
   return (
-    <main className="p-4 md:p-10 mx-auto max-w-7xl">
+    <DashboardShell>
       {/* Header com métricas */}
       <div className="mb-8">
         <div className="mb-6">
@@ -219,6 +220,6 @@ export default function PedidosPage() {
           )}
         </div>
       </Card>
-    </main>
+    </DashboardShell>
   )
 } 

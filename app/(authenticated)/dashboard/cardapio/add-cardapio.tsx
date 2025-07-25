@@ -13,43 +13,47 @@ interface AddCardapioProps {
 
 export default function AddCardapio({ isOpen, onClose, onSuccess }: AddCardapioProps) {
   const [item, setItem] = useState('');
-  const [status, setStatus] = useState('ativo');
+  const [price, setPrice] = useState('');
+  const [menuId, setMenuId] = useState('');
+  const [restaurantId, setRestaurantId] = useState('');
+  const [active, setActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!item.trim()) {
-      setError('O nome do item é obrigatório');
+    if (!item.trim() || !price || !menuId || !restaurantId) {
+      setError('Nome, preço, menu_id e restaurant_id são obrigatórios');
       return;
     }
-
     setLoading(true);
     setError('');
-
     try {
-      const { error } = await supabase
-        .from('cardapios')
-        .insert([
-          {
-            item: item.trim(),
-            status: status
-          }
-        ]);
-
-      if (error) {
-        throw error;
+      const response = await fetch('/api/cardapios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: item.trim(),
+          price: parseFloat(price),
+          menu_id: parseInt(menuId, 10),
+          restaurant_id: parseInt(restaurantId, 10),
+          active
+        })
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao adicionar cardápio. Tente novamente.');
       }
-
-      // Limpar formulário
       setItem('');
-      setStatus('ativo');
+      setPrice('');
+      setMenuId('');
+      setRestaurantId('');
+      setActive(true);
       onSuccess();
       onClose();
     } catch (err: any) {
       console.error('Erro ao adicionar cardápio:', err);
-      setError('Erro ao adicionar cardápio. Tente novamente.');
+      setError(err.message || 'Erro ao adicionar cardápio. Tente novamente.');
     } finally {
       setLoading(false);
     }
@@ -79,18 +83,53 @@ export default function AddCardapio({ isOpen, onClose, onSuccess }: AddCardapioP
             </div>
 
             <div>
-              <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
-                Status
+              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                Preço *
+              </label>
+              <TextInput
+                id="price"
+                placeholder="Ex: 19.90"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="menuId" className="block text-sm font-medium text-gray-700 mb-1">
+                Menu ID *
+              </label>
+              <TextInput
+                id="menuId"
+                placeholder="ID do menu"
+                value={menuId}
+                onChange={(e) => setMenuId(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="restaurantId" className="block text-sm font-medium text-gray-700 mb-1">
+                Restaurante ID *
+              </label>
+              <TextInput
+                id="restaurantId"
+                placeholder="ID do restaurante"
+                value={restaurantId}
+                onChange={(e) => setRestaurantId(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor="active" className="block text-sm font-medium text-gray-700 mb-1">
+                Ativo
               </label>
               <select
-                id="status"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
+                id="active"
+                value={active ? 'ativo' : 'inativo'}
+                onChange={(e) => setActive(e.target.value === 'ativo')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="ativo">Ativo</option>
                 <option value="inativo">Inativo</option>
-                <option value="em_breve">Em Breve</option>
               </select>
             </div>
 

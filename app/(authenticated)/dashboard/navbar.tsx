@@ -25,13 +25,18 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [navHovered, setNavHovered] = useState(false);
+
+  // Recolhe menu mobile automaticamente ao sair o mouse
+  const handleNavMouseEnter = () => setNavHovered(true);
+  const handleNavMouseLeave = () => setNavHovered(false);
 
   const handleSignOut = async () => {
     await signOut({ callbackUrl: '/login' });
   };
 
   return (
-    <Disclosure as="nav" className="bg-white shadow">
+    <Disclosure as="nav" className="bg-white shadow fixed top-0 left-0 right-0 z-40" onMouseEnter={handleNavMouseEnter} onMouseLeave={handleNavMouseLeave}>
       {({ open }) => (
         <>
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -155,7 +160,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          <Disclosure.Panel className="sm:hidden">
+          <Disclosure.Panel className={`sm:hidden transition-all duration-300 ${navHovered || open ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
             <div className="space-y-1 pb-3 pt-2">
               {navigation.map((item) => (
                 <Disclosure.Button

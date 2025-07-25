@@ -2,6 +2,7 @@
 
 import { useTheme } from '../lib/contexts/ThemeContext'
 import { SunIcon, MoonIcon } from '@heroicons/react/24/outline'
+import { useEffect, useState } from 'react'
 
 interface ThemeToggleProps {
   className?: string
@@ -9,7 +10,13 @@ interface ThemeToggleProps {
 }
 
 export default function ThemeToggle({ className = '', size = 'md' }: ThemeToggleProps) {
+  const [mounted, setMounted] = useState(false)
   const { theme, toggleTheme } = useTheme()
+
+  // Evitar hidratação incorreta
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const sizeClasses = {
     sm: 'w-8 h-8',
@@ -21,6 +28,26 @@ export default function ThemeToggle({ className = '', size = 'md' }: ThemeToggle
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
     lg: 'w-6 h-6'
+  }
+
+  // Renderizar um placeholder durante SSR
+  if (!mounted) {
+    return (
+      <div
+        className={`
+          ${sizeClasses[size]}
+          ${className}
+          relative inline-flex items-center justify-center
+          rounded-lg border border-gray-200 dark:border-gray-700
+          bg-white dark:bg-gray-800
+          text-gray-700 dark:text-gray-200
+          transition-all duration-200 ease-in-out
+          shadow-sm
+        `}
+      >
+        <div className={iconSizes[size]} />
+      </div>
+    )
   }
 
   return (

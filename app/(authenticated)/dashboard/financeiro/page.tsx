@@ -11,6 +11,7 @@ import {
   PlusIcon
 } from '@heroicons/react/24/outline'
 import Link from 'next/link'
+import DashboardShell from '../DashboardShell';
 
 interface MetricasFinanceiras {
   totalReceitas: number
@@ -67,7 +68,7 @@ export default function FinanceiroPage() {
   }
 
   return (
-    <main className="p-4 md:p-10 mx-auto max-w-7xl">
+    <DashboardShell>
       {/* Header */}
       <div className="mb-8">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
@@ -284,6 +285,6 @@ export default function FinanceiroPage() {
           </div>
         </Card>
       </div>
-    </main>
+    </DashboardShell>
   )
 } 

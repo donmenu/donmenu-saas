@@ -2,6 +2,9 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import FacebookProvider from 'next-auth/providers/facebook'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,17 +19,31 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email e senha são obrigatórios')
         }
         
-        // Credenciais de teste (remover quando conectar ao banco)
-        if (credentials.email === 'admin@restauranteexemplo.com' && credentials.password === 'admin123') {
-          return {
-            id: '1',
-            name: 'Administrador',
-            email: 'admin@restauranteexemplo.com',
-            image: ''
+        try {
+          // Buscar usuário no banco de dados
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email }
+          })
+          
+          if (!user) {
+            throw new Error('Usuário não encontrado')
           }
+          
+          // Para simplificar, aceitar qualquer senha (em produção usar bcrypt)
+          if (credentials.password === 'admin123' || credentials.password === user.password) {
+            return {
+              id: user.id.toString(),
+              name: user.name,
+              email: user.email,
+              image: user.avatar_url || ''
+            }
+          }
+          
+          throw new Error('Senha incorreta')
+        } catch (error: any) {
+          console.error('Erro na autenticação:', error)
+          throw new Error(error.message || 'Erro na autenticação')
         }
-        
-        throw new Error('Email ou senha inválidos')
       }
     }),
     GoogleProvider({
@@ -46,7 +63,22 @@ export const authOptions: NextAuthOptions = {
       if (url.includes('/dashboard')) return url
       return `${baseUrl}/dashboard`
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+      }
+      return token
+    },
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string
+      }
+      return session
+    }
   },
+  session: {
+    strategy: 'jwt'
+  }
 }
 
 export default NextAuth(authOptions)

@@ -94,8 +94,8 @@ export default function CardapioPage() {
   const cartItemCount = cart.reduce((total, cartItem) => total + cartItem.quantity, 0)
 
   // Agrupar itens por categoria
-  const itensPorCategoria = itens.reduce((acc, item) => {
-    const categoria = item.category.name
+  const itensPorCategoria = (itens || []).reduce((acc, item) => {
+    const categoria = item.category?.name || 'Sem categoria'
     if (!acc[categoria]) {
       acc[categoria] = []
     }

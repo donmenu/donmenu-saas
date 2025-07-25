@@ -16,7 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           subtotal: total,
           total: total,
           payment_method: "pendente",
-          status: "pending"
+          status: "pending",
+          restaurant_id: 1 // ID do restaurante padrão
         }
       })
 

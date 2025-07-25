@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import { 
   HomeIcon, 
   Bars3Icon, 
@@ -15,13 +15,14 @@ import {
   BanknotesIcon,
   ArrowUpIcon,
   ArrowDownIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  BuildingStorefrontIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline'
-import ThemeToggle from '../../../components/ThemeToggle'
-import Image from 'next/image'
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
+  { name: 'Restaurantes', href: '/dashboard/restaurants', icon: BuildingStorefrontIcon },
   { name: 'Cardápios', href: '/dashboard/cardapio', icon: Bars3Icon },
   { name: 'Insumos', href: '/dashboard/supplies', icon: CubeIcon },
   { name: 'Fichas Técnicas', href: '/dashboard/ficha-tecnica', icon: ClipboardDocumentListIcon },
@@ -41,17 +42,18 @@ const navigation = [
     ]
   },
   { name: 'CMV', href: '/dashboard/cmv', icon: ChartBarIcon },
+  { name: 'Assinatura', href: '/dashboard/assinatura', icon: CreditCardIcon },
   { name: 'Configurações', href: '/dashboard/settings', icon: HomeIcon },
 ]
 
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false)
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
+export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed: boolean, onExpand: () => void, onCollapse: () => void }) {
   const pathname = usePathname()
+  const [expandedItems, setExpandedItems] = useState<string[]>([])
 
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed)
-  }
+  const handleMouseEnter = () => onExpand()
+  const handleMouseLeave = () => onCollapse()
+
+  const toggleCollapsed = () => collapsed ? onExpand() : onCollapse()
 
   const toggleExpanded = (itemName: string) => {
     setExpandedItems(prev => 
@@ -75,20 +77,27 @@ export default function Sidebar() {
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 shadow-lg transition-all duration-300 ${collapsed ? 'w-16' : 'w-64'} h-screen z-30 fixed`}>
+    <div 
+      className={`
+        fixed left-0 top-0 h-full bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700
+        transition-all duration-300 ease-in-out z-50
+        ${collapsed ? 'w-16' : 'w-64'}
+      `}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         {!collapsed && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">
-                <Image src="/images/logo.svg" alt="Don Menu" width={32} height={32} />
-              </span>
+              <span className="text-white font-bold text-sm">D</span>
             </div>
-            <span className="text-lg font-semibold text-gray-900 dark:text-white">DonMenu</span>
+            <span className="font-bold text-lg text-gray-900 dark:text-white">Don Menu</span>
           </div>
         )}
+        
         <div className="flex items-center space-x-2">
-          <ThemeToggle size="sm" />
           <button
             onClick={toggleCollapsed}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

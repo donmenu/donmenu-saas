@@ -7,6 +7,9 @@ declare module 'next-auth' {
       name: string
       email: string
       image: string
+      phone?: string
+      address?: string
+      bio?: string
     }
     accessToken: string
   }
@@ -16,6 +19,9 @@ declare module 'next-auth' {
     name: string
     email: string
     image: string
+    phone?: string
+    address?: string
+    bio?: string
   }
 }
 
