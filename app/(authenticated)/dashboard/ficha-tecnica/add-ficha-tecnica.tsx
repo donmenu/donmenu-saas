@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { Button, TextInput, Title, Text } from '@tremor/react';
-import supabase from '../../../../lib/supabase';
+import ManageCategories from './manage-categories';
 
 interface Category {
-  category_id: number;
+  id: number;
   name: string;
+  description?: string;
+  color?: string;
+  icon?: string;
 }
 
 interface Ingredient {
@@ -25,7 +28,11 @@ interface AddFichaTecnicaProps {
 export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFichaTecnicaProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
+  const [yieldQuantity, setYieldQuantity] = useState('');
+  const [yieldUnit, setYieldUnit] = useState('');
+  const [preparationTime, setPreparationTime] = useState('');
+  const [difficulty, setDifficulty] = useState('');
+  const [instructions, setInstructions] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState('');
@@ -37,6 +44,7 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState(1); // 1: Produto, 2: Ingredientes, 3: Revisão
+  const [showManageCategories, setShowManageCategories] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -47,12 +55,11 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
 
   const fetchCategories = async () => {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('category_id, name')
-        .order('name');
-
-      if (error) throw error;
+      const response = await fetch('/api/categories');
+      if (!response.ok) {
+        throw new Error('Erro ao buscar categorias');
+      }
+      const data = await response.json();
       setCategories(data || []);
     } catch (err: any) {
       console.error('Erro ao buscar categorias:', err);
@@ -61,12 +68,11 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
 
   const fetchIngredients = async () => {
     try {
-      const { data, error } = await supabase
-        .from('ingredients')
-        .select('ingredient_id, name, unit, cost_per_unit')
-        .order('name');
-
-      if (error) throw error;
+      const response = await fetch('/api/ingredients');
+      if (!response.ok) {
+        throw new Error('Erro ao buscar ingredientes');
+      }
+      const data = await response.json();
       setAvailableIngredients(data || []);
     } catch (err: any) {
       console.error('Erro ao buscar ingredientes:', err);
@@ -99,30 +105,57 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
     if (!newCategory.trim()) return;
     setAddingCategory(true);
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .insert([{ name: newCategory.trim() }])
-        .select();
-      if (error) throw error;
-      setCategories([...categories, ...(data || [])]);
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newCategory.trim(),
+          description: `Categoria ${newCategory.trim()}`,
+          color: '#3B82F6',
+          icon: '📁'
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao adicionar categoria');
+      }
+
+      const newCategoryData = await response.json();
+      setCategories([...categories, newCategoryData]);
+      setCategoryId(newCategoryData.id.toString());
       setNewCategory('');
     } catch (err) {
+      console.error('Erro ao adicionar categoria:', err);
       alert('Erro ao adicionar categoria.');
     } finally {
       setAddingCategory(false);
     }
   };
 
+  const handleSelectCategory = (category: Category) => {
+    setCategoryId(category.id.toString());
+    setShowManageCategories(false);
+  };
+
   // Validação de cada etapa
   const validateStep1 = () => {
-    if (!name.trim()) return 'O nome do item é obrigatório';
-    if (!price || parseFloat(price) <= 0) return 'O preço deve ser maior que zero';
+    if (!name.trim()) return 'O nome da ficha técnica é obrigatório';
+    if (!yieldQuantity || parseFloat(yieldQuantity) <= 0) return 'A quantidade de rendimento deve ser maior que zero';
+    if (!yieldUnit.trim()) return 'A unidade de rendimento é obrigatória';
     if (!categoryId) return 'A categoria é obrigatória';
     return '';
   };
+  
   const validateStep2 = () => {
     if (ingredients.length === 0) return 'Adicione pelo menos um ingrediente';
     return '';
+  };
+
+  // Calcular custo total
+  const calculateTotalCost = () => {
+    return ingredients.reduce((acc, ing) => acc + (ing.ingredient.cost_per_unit * ing.quantity), 0);
   };
 
   // Novo handleSubmit para wizard
@@ -147,35 +180,57 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
       setLoading(true);
       setError('');
       try {
-        const { data: itemData, error: itemError } = await supabase
-          .from('itens')
-          .insert([
-            {
-              name: name.trim(),
-              description: description.trim() || null,
-              price: parseFloat(price),
-              category_id: parseInt(categoryId)
-            }
-          ])
-          .select()
-          .single();
-        if (itemError) throw itemError;
-        if (ingredients.length > 0 && itemData) {
-          const ingredientsToInsert = ingredients.map(ing => ({
-            item_id: itemData.item_id,
-            ingredient_id: ing.ingredient_id,
-            quantity: ing.quantity
-          }));
-          const { error: ingredientsError } = await supabase
-            .from('item_ingredients')
-            .insert(ingredientsToInsert);
-          if (ingredientsError) throw ingredientsError;
+        const totalCost = calculateTotalCost();
+        const costPerYield = totalCost / parseFloat(yieldQuantity);
+
+        const response = await fetch('/api/ficha-tecnica', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: name.trim(),
+            description: description.trim() || null,
+            category_id: parseInt(categoryId),
+            yield_quantity: parseFloat(yieldQuantity),
+            yield_unit: yieldUnit.trim(),
+            preparation_time: preparationTime ? parseInt(preparationTime) : null,
+            difficulty: difficulty.trim() || null,
+            instructions: instructions.trim() || null,
+            total_cost: totalCost,
+            cost_per_yield: costPerYield,
+            ingredients: ingredients.map(ing => ({
+              ingredient_id: ing.ingredient_id,
+              quantity: ing.quantity,
+              unit: ing.ingredient.unit
+            }))
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro ao criar ficha técnica');
         }
-        setName(''); setDescription(''); setPrice(''); setCategoryId(''); setIngredients([]);
-        onSuccess(); onClose();
+
+        // Limpar formulário
+        setName('');
+        setDescription('');
+        setYieldQuantity('');
+        setYieldUnit('');
+        setPreparationTime('');
+        setDifficulty('');
+        setInstructions('');
+        setCategoryId('');
+        setIngredients([]);
+        setStep(1);
+        onSuccess();
+        onClose();
       } catch (err: any) {
-        setError('Erro ao criar ficha técnica. Tente novamente.');
-      } finally { setLoading(false); }
+        console.error('Erro ao criar ficha técnica:', err);
+        setError(err.message || 'Erro ao criar ficha técnica. Tente novamente.');
+      } finally { 
+        setLoading(false); 
+      }
     }
   };
 
@@ -195,7 +250,7 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
           <div className="flex justify-between items-start mb-6">
             <div>
               <Title>Nova Ficha Técnica</Title>
-              <Text className="mt-2">Crie um novo item com sua ficha técnica</Text>
+              <Text className="mt-2">Crie uma nova ficha técnica com ingredientes e custos</Text>
             </div>
             <Button variant="secondary" onClick={onClose} disabled={loading}>Cancelar</Button>
           </div>
@@ -212,18 +267,33 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
             {step === 1 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome do Produto *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Ficha Técnica *</label>
                   <TextInput placeholder="Ex: Pizza Margherita, X-Burger..." value={name} onChange={e=>setName(e.target.value)} required />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Categoria *</label>
                   <div className="flex gap-2">
-                    <select value={categoryId} onChange={e=>setCategoryId(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                    <select 
+                      value={categoryId} 
+                      onChange={e=>setCategoryId(e.target.value)} 
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                      required
+                    >
                       <option value="">Selecione uma categoria</option>
                       {categories.map((category) => (
-                        <option key={category.category_id} value={category.category_id}>{category.name}</option>
+                        <option key={category.id} value={category.id}>{category.name}</option>
                       ))}
                     </select>
+                    <Button 
+                      type="button" 
+                      size="xs" 
+                      variant="secondary"
+                      onClick={() => setShowManageCategories(true)}
+                    >
+                      Gerenciar
+                    </Button>
+                  </div>
+                  <div className="mt-2 flex gap-2">
                     <input
                       type="text"
                       placeholder="Nova categoria"
@@ -231,16 +301,74 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
                       onChange={e=>setNewCategory(e.target.value)}
                       className="px-2 py-1 border border-gray-300 rounded-md w-32"
                     />
-                    <Button type="button" size="xs" loading={addingCategory} onClick={handleAddCategory} disabled={!newCategory.trim() || addingCategory}>+</Button>
+                    <Button 
+                      type="button" 
+                      size="xs" 
+                      loading={addingCategory} 
+                      onClick={handleAddCategory} 
+                      disabled={!newCategory.trim() || addingCategory}
+                    >
+                      +
+                    </Button>
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Preço (R$) *</label>
-                  <TextInput placeholder="0.00" value={price} onChange={e=>setPrice(e.target.value)} required />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Quantidade de Rendimento *</label>
+                  <TextInput placeholder="1" value={yieldQuantity} onChange={e=>setYieldQuantity(e.target.value)} required />
                 </div>
                 <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Unidade de Rendimento *</label>
+                  <select 
+                    value={yieldUnit} 
+                    onChange={e=>setYieldUnit(e.target.value)} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                    required
+                  >
+                    <option value="">Selecione uma unidade</option>
+                    <option value="un">Unidade (un)</option>
+                    <option value="kg">Quilograma (kg)</option>
+                    <option value="g">Grama (g)</option>
+                    <option value="l">Litro (L)</option>
+                    <option value="ml">Mililitro (ml)</option>
+                    <option value="pct">Porção (pct)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tempo de Preparo (minutos)</label>
+                  <TextInput placeholder="30" value={preparationTime} onChange={e=>setPreparationTime(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Dificuldade</label>
+                  <select 
+                    value={difficulty} 
+                    onChange={e=>setDifficulty(e.target.value)} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">Selecione a dificuldade</option>
+                    <option value="Fácil">Fácil</option>
+                    <option value="Médio">Médio</option>
+                    <option value="Difícil">Difícil</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                  <textarea placeholder="Descrição do produto..." value={description} onChange={e=>setDescription(e.target.value)} rows={3} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <textarea 
+                    placeholder="Descrição da ficha técnica..." 
+                    value={description} 
+                    onChange={e=>setDescription(e.target.value)} 
+                    rows={3} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Instruções de Preparo</label>
+                  <textarea 
+                    placeholder="Passo a passo do preparo..." 
+                    value={instructions} 
+                    onChange={e=>setInstructions(e.target.value)} 
+                    rows={4} 
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                  />
                 </div>
               </div>
             )}
@@ -253,10 +381,16 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Ingrediente</label>
-                    <select value={selectedIngredient} onChange={e=>setSelectedIngredient(e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select 
+                      value={selectedIngredient} 
+                      onChange={e=>setSelectedIngredient(e.target.value)} 
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
                       <option value="">Selecione um ingrediente</option>
                       {availableIngredients.map((ingredient) => (
-                        <option key={ingredient.ingredient_id} value={ingredient.ingredient_id}>{ingredient.name} ({ingredient.unit})</option>
+                        <option key={ingredient.ingredient_id} value={ingredient.ingredient_id}>
+                          {ingredient.name} ({ingredient.unit})
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -265,7 +399,9 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
                     <TextInput placeholder="0.00" value={quantity} onChange={e=>setQuantity(e.target.value)} />
                   </div>
                   <div className="flex items-end">
-                    <Button type="button" onClick={handleAddIngredient} disabled={!selectedIngredient || !quantity} className="w-full">Adicionar</Button>
+                    <Button type="button" onClick={handleAddIngredient} disabled={!selectedIngredient || !quantity} className="w-full">
+                      Adicionar
+                    </Button>
                   </div>
                 </div>
                 {/* Ingredientes adicionados */}
@@ -291,7 +427,9 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
                               <td className="border border-gray-300 px-4 py-2">{ingredient.ingredient.unit}</td>
                               <td className="border border-gray-300 px-4 py-2">{formatCurrency(ingredient.ingredient.cost_per_unit)}</td>
                               <td className="border border-gray-300 px-4 py-2">
-                                <Button size="xs" variant="secondary" color="red" onClick={()=>handleRemoveIngredient(ingredient.ingredient_id)}>Remover</Button>
+                                <Button size="xs" variant="secondary" color="red" onClick={()=>handleRemoveIngredient(ingredient.ingredient_id)}>
+                                  Remover
+                                </Button>
                               </td>
                             </tr>
                           ))}
@@ -308,9 +446,9 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
               <div>
                 <Title className="mb-4">Revisão da Ficha Técnica</Title>
                 <div className="mb-4">
-                  <Text className="font-bold">Produto:</Text> {name}<br/>
-                  <Text className="font-bold">Categoria:</Text> {categories.find(c=>c.category_id.toString()===categoryId)?.name}<br/>
-                  <Text className="font-bold">Preço:</Text> {formatCurrency(Number(price))}<br/>
+                  <Text className="font-bold">Nome:</Text> {name}<br/>
+                  <Text className="font-bold">Categoria:</Text> {categories.find(c=>c.id.toString()===categoryId)?.name}<br/>
+                  <Text className="font-bold">Rendimento:</Text> {yieldQuantity} {yieldUnit}<br/>
                   <Text className="font-bold">Descrição:</Text> {description || '-'}
                 </div>
                 <Title className="mb-2">Ingredientes</Title>
@@ -339,7 +477,8 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
                   </table>
                 </div>
                 <div className="mb-2 text-right font-bold">
-                  Custo total estimado: {formatCurrency(ingredients.reduce((acc, ing) => acc + (ing.ingredient.cost_per_unit * ing.quantity), 0))}
+                  Custo total: {formatCurrency(calculateTotalCost())}<br/>
+                  Custo por {yieldUnit}: {formatCurrency(calculateTotalCost() / parseFloat(yieldQuantity))}
                 </div>
               </div>
             )}
@@ -349,17 +488,30 @@ export default function AddFichaTecnica({ isOpen, onClose, onSuccess }: AddFicha
             {/* Navegação do Wizard */}
             <div className="flex justify-between space-x-3">
               {step > 1 ? (
-                <Button type="button" variant="secondary" onClick={()=>setStep(step-1)} disabled={loading}>Voltar</Button>
+                <Button type="button" variant="secondary" onClick={()=>setStep(step-1)} disabled={loading}>
+                  Voltar
+                </Button>
               ) : <span />}
               {step < 3 ? (
-                <Button type="submit" disabled={loading}>{step===1?'Avançar':'Próximo'}</Button>
+                <Button type="submit" disabled={loading}>
+                  {step===1?'Avançar':'Próximo'}
+                </Button>
               ) : (
-                <Button type="submit" loading={loading} disabled={loading}>Criar Ficha Técnica</Button>
+                <Button type="submit" loading={loading} disabled={loading}>
+                  Criar Ficha Técnica
+                </Button>
               )}
             </div>
           </form>
         </div>
       </div>
+
+      {/* Modal de Gerenciamento de Categorias */}
+      <ManageCategories
+        isOpen={showManageCategories}
+        onClose={() => setShowManageCategories(false)}
+        onCategorySelect={handleSelectCategory}
+      />
     </div>
   );
 } 

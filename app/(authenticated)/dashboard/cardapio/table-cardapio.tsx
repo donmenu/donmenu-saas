@@ -14,6 +14,8 @@ import {
 import { useState } from 'react';
 import { PencilIcon, TrashIcon, EyeIcon, TagIcon } from '@heroicons/react/24/outline';
 import type { Cardapio } from '../../../../types/cardapio';
+import ViewProduct from './view-product';
+import EditProduct from './edit-product';
 
 interface CardapiosTableProps {
   cardapios: Cardapio[];
@@ -22,6 +24,8 @@ interface CardapiosTableProps {
 
 export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTableProps) {
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<Cardapio | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Cardapio | null>(null);
 
   const handleDelete = async (id: number) => {
     if (!confirm('Tem certeza que deseja excluir este item do cardápio?')) {
@@ -48,17 +52,17 @@ export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTablePr
     }
   };
 
-  const getStatusBadge = (status: string | null) => {
-    switch (status) {
-      case 'ativo':
-        return <Badge color="green" className="bg-green-100 text-green-800">Ativo</Badge>;
-      case 'inativo':
-        return <Badge color="red" className="bg-red-100 text-red-800">Inativo</Badge>;
-      case 'em_breve':
-        return <Badge color="yellow" className="bg-yellow-100 text-yellow-800">Em Breve</Badge>;
-      default:
-        return <Badge color="gray" className="bg-gray-100 text-gray-800">Indefinido</Badge>;
-    }
+  const getStatusBadge = (active: boolean) => {
+    return active ? 
+      <Badge color="green" className="bg-green-100 text-green-800">Ativo</Badge> :
+      <Badge color="red" className="bg-red-100 text-red-800">Inativo</Badge>;
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
   };
 
   return (
@@ -66,7 +70,9 @@ export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTablePr
       <Table>
         <TableHead>
           <TableRow className="bg-gray-50">
-            <TableHeaderCell className="font-semibold text-gray-700">Item</TableHeaderCell>
+            <TableHeaderCell className="font-semibold text-gray-700">Produto</TableHeaderCell>
+            <TableHeaderCell className="font-semibold text-gray-700">Preço</TableHeaderCell>
+            <TableHeaderCell className="font-semibold text-gray-700">Categoria</TableHeaderCell>
             <TableHeaderCell className="font-semibold text-gray-700">Status</TableHeaderCell>
             <TableHeaderCell className="font-semibold text-gray-700 text-center">Ações</TableHeaderCell>
           </TableRow>
@@ -77,18 +83,40 @@ export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTablePr
               <TableCell>
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                      <TagIcon className="w-5 h-5 text-green-600" />
+                    {cardapio.image_url ? (
+                      <img 
+                        src={cardapio.image_url} 
+                        alt={cardapio.name}
+                        className="w-12 h-12 rounded-lg object-cover border"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center ${cardapio.image_url ? 'hidden' : ''}`}>
+                      <TagIcon className="w-6 h-6 text-green-600" />
                     </div>
                   </div>
                   <div className="ml-4">
-                    <Text className="font-medium text-gray-900">{cardapio.item}</Text>
+                    <Text className="font-medium text-gray-900">{cardapio.name}</Text>
                     <Text className="text-sm text-gray-500">ID: {cardapio.id}</Text>
+                    {cardapio.description && (
+                      <Text className="text-xs text-gray-400 line-clamp-1">{cardapio.description}</Text>
+                    )}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
-                {getStatusBadge(cardapio.status)}
+                <Text className="font-medium text-green-600">{formatCurrency(cardapio.price)}</Text>
+              </TableCell>
+              <TableCell>
+                <Text className="text-sm text-gray-600">
+                  {cardapio.category?.name || 'Sem categoria'}
+                </Text>
+              </TableCell>
+              <TableCell>
+                {getStatusBadge(cardapio.active)}
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center space-x-2">
@@ -96,6 +124,7 @@ export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTablePr
                     size="xs"
                     variant="secondary"
                     icon={EyeIcon}
+                    onClick={() => setViewingProduct(cardapio)}
                     className="bg-blue-50 text-blue-600 hover:bg-blue-100"
                   >
                     Ver
@@ -104,6 +133,7 @@ export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTablePr
                     size="xs"
                     variant="secondary"
                     icon={PencilIcon}
+                    onClick={() => setEditingProduct(cardapio)}
                     className="bg-yellow-50 text-yellow-600 hover:bg-yellow-100"
                   >
                     Editar
@@ -125,6 +155,27 @@ export default function CardapiosTable({ cardapios, onUpdate }: CardapiosTablePr
           ))}
         </TableBody>
       </Table>
+
+      {/* Modais */}
+      <ViewProduct
+        isOpen={!!viewingProduct}
+        onClose={() => setViewingProduct(null)}
+        product={viewingProduct}
+        onEdit={(product: Cardapio) => {
+          setViewingProduct(null);
+          setEditingProduct(product);
+        }}
+      />
+
+      <EditProduct
+        isOpen={!!editingProduct}
+        onClose={() => setEditingProduct(null)}
+        product={editingProduct}
+        onSuccess={() => {
+          setEditingProduct(null);
+          onUpdate();
+        }}
+      />
     </div>
   );
 }

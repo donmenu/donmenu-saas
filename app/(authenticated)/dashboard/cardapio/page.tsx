@@ -2,10 +2,14 @@
 
 import { Card, Title, Text, Button, Badge, Metric, Flex } from '@tremor/react'
 import { useEffect, useState, useCallback } from 'react'
-import { PlusIcon, Bars3Icon, CheckCircleIcon, ClockIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, CheckCircleIcon, ClockIcon, SparklesIcon, Cog6ToothIcon, ViewColumnsIcon, Squares2X2Icon, ShoppingBagIcon } from '@heroicons/react/24/outline'
 import Search from '../../../search'
 import CardapiosTable from './table-cardapio'
+import IntelligentAssistant from './intelligent-assistant'
+import ManageMenus from './manage-menus'
+import ManageCombos from './manage-combos'
 import AddCardapio from './add-cardapio'
+import Breadcrumb from './breadcrumb'
 import type { Cardapio } from '../../../../types/cardapio'
 import DashboardShell from '../DashboardShell';
 
@@ -13,7 +17,11 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
   const [cardapios, setCardapios] = useState<Cardapio[]>([])
   const [errorMessage, setErrorMessage] = useState('')
   const [loading, setLoading] = useState(true)
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false)
+  const [isManageMenusOpen, setIsManageMenusOpen] = useState(false)
+  const [isManageCombosOpen, setIsManageCombosOpen] = useState(false)
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false)
+  const [selectedMenuForProduct, setSelectedMenuForProduct] = useState<number | null>(null)
 
   const search = searchParams.q ?? ''
 
@@ -44,29 +52,71 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
     fetchData()
   }
 
+  const handleAddProduct = useCallback((menuId: number) => {
+    setSelectedMenuForProduct(menuId)
+    setIsAddProductOpen(true)
+    setIsManageMenusOpen(false)
+  }, [])
+
   // Calcular métricas
   const totalCardapios = cardapios.length
-  const ativos = cardapios.filter(c => c.status === 'ativo').length
-  const inativos = cardapios.filter(c => c.status === 'inativo').length
+  const ativos = cardapios.filter(c => c.active).length
+  const inativos = cardapios.filter(c => !c.active).length
 
   return (
     <DashboardShell>
-      {/* todo o conteúdo atual da página */}
-      <main className="py-4 md:py-10 mx-auto max-w-7xl">
+      <div className="p-6">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { label: 'Cardápio', href: '/dashboard/cardapio', current: true }
+          ]}
+        />
+
         {/* Header com métricas */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div>
-              <Title className="text-3xl font-bold text-gray-900 dark:text-white">Cardápios</Title>
-              <Text className="text-gray-600 dark:text-gray-300 mt-2">Gerencie os itens do seu cardápio</Text>
+              <Title className="text-3xl font-bold text-gray-900 dark:text-white">Produtos do Cardápio</Title>
+              <Text className="text-gray-600 dark:text-gray-300 mt-2">Gerencie os itens individuais do seu cardápio</Text>
             </div>
-            <Button
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
-              icon={PlusIcon}
-            >
-              Adicionar Item
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={() => window.location.href = '/dashboard/cardapio/modern'}
+                className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                icon={Squares2X2Icon}
+              >
+                Visualização Moderna
+              </Button>
+              <Button
+                onClick={() => window.location.href = '/dashboard/cardapio/menus'}
+                className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                icon={ViewColumnsIcon}
+              >
+                Ver Cardápios
+              </Button>
+              <Button
+                onClick={() => setIsManageMenusOpen(true)}
+                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                icon={Cog6ToothIcon}
+              >
+                Gerenciar Cardápios
+              </Button>
+              <Button
+                onClick={() => setIsManageCombosOpen(true)}
+                className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                icon={ShoppingBagIcon}
+              >
+                Gerenciar Combos
+              </Button>
+              <Button
+                onClick={() => setIsAssistantOpen(true)}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg shadow-lg transition-all duration-200 transform hover:scale-105"
+                icon={SparklesIcon}
+              >
+                Assistente IA
+              </Button>
+            </div>
           </div>
 
           {/* Cards de métricas */}
@@ -117,8 +167,8 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
         {/* Tabela */}
         <Card className="bg-white dark:bg-gray-800 shadow-xl border-0 rounded-xl overflow-hidden">
           <div className="p-6 border-b border-gray-100 dark:border-gray-700">
-            <Title className="text-xl font-semibold text-gray-800 dark:text-white">Lista de Cardápios</Title>
-            <Text className="text-gray-600 dark:text-gray-300 mt-1">Visualize e gerencie todos os itens do cardápio</Text>
+            <Title className="text-xl font-semibold text-gray-800 dark:text-white">Lista de Produtos</Title>
+            <Text className="text-gray-600 dark:text-gray-300 mt-1">Visualize e gerencie todos os itens individuais</Text>
           </div>
           
           <div className="p-6">
@@ -150,12 +200,39 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
           </div>
         </Card>
 
-        <AddCardapio
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSuccess={handleAddSuccess}
+
+
+        <IntelligentAssistant
+          isOpen={isAssistantOpen}
+          onClose={() => setIsAssistantOpen(false)}
+          onProductCreated={handleAddSuccess}
         />
-      </main>
+
+        <ManageMenus
+          isOpen={isManageMenusOpen}
+          onClose={() => setIsManageMenusOpen(false)}
+                  onAddProduct={handleAddProduct}
+      />
+
+      <ManageCombos
+        isOpen={isManageCombosOpen}
+        onClose={() => setIsManageCombosOpen(false)}
+      />
+
+      <AddCardapio
+          isOpen={isAddProductOpen}
+          onClose={() => {
+            setIsAddProductOpen(false)
+            setSelectedMenuForProduct(null)
+          }}
+          onSuccess={() => {
+            setIsAddProductOpen(false)
+            setSelectedMenuForProduct(null)
+            handleAddSuccess()
+          }}
+          preSelectedMenuId={selectedMenuForProduct}
+        />
+      </div>
     </DashboardShell>
   )
 }

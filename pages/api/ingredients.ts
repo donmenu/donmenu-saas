@@ -21,12 +21,40 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             mode: "insensitive"
           }
         },
+        select: {
+          id: true,
+          name: true,
+          unit: true,
+          cost_per_unit: true,
+          description: true,
+          supplier: true,
+          current_stock: true,
+          min_stock: true,
+          image_url: true,
+          created_at: true,
+          active: true
+        },
         orderBy: {
           created_at: "desc"
         }
       })
 
-      res.status(200).json(ingredients)
+      // Mapear para o formato esperado pelo frontend
+      const mappedIngredients = ingredients.map(ingredient => ({
+        ingredient_id: ingredient.id,
+        name: ingredient.name,
+        unit: ingredient.unit,
+        cost_per_unit: ingredient.cost_per_unit,
+        description: ingredient.description,
+        supplier: ingredient.supplier,
+        current_stock: ingredient.current_stock,
+        min_stock: ingredient.min_stock,
+        image_url: ingredient.image_url,
+        created_at: ingredient.created_at,
+        active: ingredient.active
+      }))
+
+      res.status(200).json(mappedIngredients)
     } catch (error: any) {
       if (error.message === 'Não autenticado' || error.message === 'Restaurante não encontrado para o usuário') {
         res.status(401).json({ error: error.message })
@@ -40,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Obter restaurant_id do usuário logado
       const restaurantId = await getRestaurantIdFromSession(req, res)
       
-      const { name, unit, cost_per_unit, description, supplier, min_stock, current_stock } = req.body
+      const { name, unit, cost_per_unit, description, supplier, min_stock, current_stock, image_url } = req.body
 
       // Validações
       if (!name || !unit || cost_per_unit === undefined) {
@@ -79,6 +107,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           supplier: supplier?.trim() || null,
           min_stock: min_stock ? Number(min_stock) : null,
           current_stock: current_stock ? Number(current_stock) : 0,
+          image_url: image_url?.trim() || null,
           restaurant_id: restaurantId,
           active: true
         }

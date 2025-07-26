@@ -10,17 +10,27 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Obter restaurant_id do usuário logado
       const restaurantId = await getRestaurantIdFromSession(req, res)
       
-      const { search } = req.query
+      const { search, menu_id } = req.query
       const searchTerm = search ? String(search) : ''
+      const menuIdFilter = menu_id ? parseInt(String(menu_id)) : null
+
+      const whereClause: any = {
+        restaurant_id: restaurantId
+      }
+
+      if (searchTerm) {
+        whereClause.name = {
+          contains: searchTerm,
+          mode: 'insensitive'
+        }
+      }
+
+      if (menuIdFilter) {
+        whereClause.menu_id = menuIdFilter
+      }
 
       const cardapios = await prisma.menuItem.findMany({
-        where: {
-          restaurant_id: restaurantId,
-          name: {
-            contains: searchTerm,
-            mode: 'insensitive'
-          }
-        },
+        where: whereClause,
         include: {
           category: true,
           menu: true
@@ -53,7 +63,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         desired_margin, 
         manual_pricing, 
         price, 
-        active 
+        active
       } = req.body;
 
       // Validações básicas
@@ -131,6 +141,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             gross_profit: grossProfit,
             actual_margin: actualMargin,
             manual_pricing: manual_pricing || false,
+
             restaurant_id: restaurantId,
             active: active !== undefined ? Boolean(active) : true,
           },

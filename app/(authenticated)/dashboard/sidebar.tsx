@@ -18,7 +18,8 @@ import {
   ChartBarIcon,
   BuildingStorefrontIcon,
   CreditCardIcon,
-  RocketLaunchIcon
+  RocketLaunchIcon,
+  Cog6ToothIcon
 } from '@heroicons/react/24/outline'
 
 const navigation = [
@@ -45,7 +46,7 @@ const navigation = [
   { name: 'CMV', href: '/dashboard/cmv', icon: ChartBarIcon },
   { name: 'Roadmap', href: '/dashboard/roadmap', icon: RocketLaunchIcon },
   { name: 'Assinatura', href: '/dashboard/assinatura', icon: CreditCardIcon },
-  { name: 'Configurações', href: '/dashboard/settings', icon: HomeIcon },
+  { name: 'Configurações', href: '/dashboard/settings', icon: Cog6ToothIcon },
 ]
 
 export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed: boolean, onExpand: () => void, onCollapse: () => void }) {
@@ -89,7 +90,7 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
       onMouseLeave={handleMouseLeave}
     >
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-4 border-b border-gray-200 dark:border-gray-700`}>
         {!collapsed && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
@@ -99,7 +100,13 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
           </div>
         )}
         
-        <div className="flex items-center space-x-2">
+        {collapsed && (
+          <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">D</span>
+          </div>
+        )}
+        
+        <div className={`flex items-center ${collapsed ? 'hidden' : 'block'}`}>
           <button
             onClick={toggleCollapsed}
             className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -111,7 +118,7 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
         </div>
       </div>
 
-      <nav className="p-4 space-y-2">
+      <nav className={`${collapsed ? 'p-2' : 'p-4'} space-y-1`}>
         {navigation.map((item) => {
           const isItemActive = isActive(item.href)
           const hasSubItems = item.subItems && item.subItems.length > 0
@@ -123,19 +130,20 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
                 <div>
                   <button
                     onClick={() => toggleExpanded(item.name)}
-                    className={`w-full flex items-center justify-between p-3 rounded-lg transition-all duration-200 ${
+                    className={`w-full flex items-center ${collapsed ? 'justify-center' : 'justify-between'} p-3 rounded-lg transition-all duration-200 ${
                       isItemActive 
                         ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700' 
                         : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                     }`}
+                    title={collapsed ? item.name : undefined}
                   >
-                    <div className="flex items-center space-x-3">
-                      <item.icon className="w-5 h-5" />
+                    <div className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'}`}>
+                      <item.icon className="w-5 h-5 flex-shrink-0" />
                       {!collapsed && <span className="font-medium">{item.name}</span>}
                     </div>
                     {!collapsed && (
                       <svg 
-                        className={`w-4 h-4 transition-transform duration-200 ${
+                        className={`w-4 h-4 transition-transform duration-200 flex-shrink-0 ${
                           isExpanded ? 'rotate-180' : ''
                         }`} 
                         fill="none" 
@@ -159,7 +167,7 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
                               : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                           }`}
                         >
-                          <subItem.icon className="w-4 h-4" />
+                          <subItem.icon className="w-4 h-4 flex-shrink-0" />
                           <span className="text-sm font-medium">{subItem.name}</span>
                         </Link>
                       ))}
@@ -169,13 +177,14 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
               ) : (
                 <Link
                   href={item.href}
-                  className={`flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
+                  className={`flex items-center ${collapsed ? 'justify-center' : 'space-x-3'} p-3 rounded-lg transition-all duration-200 ${
                     isItemActive 
                       ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-700' 
                       : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
                   }`}
+                  title={collapsed ? item.name : undefined}
                 >
-                  <item.icon className="w-5 h-5" />
+                  <item.icon className="w-5 h-5 flex-shrink-0" />
                   {!collapsed && <span className="font-medium">{item.name}</span>}
                 </Link>
               )}
@@ -194,6 +203,17 @@ export default function Sidebar({ collapsed, onExpand, onCollapse }: { collapsed
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">Usuário</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 truncate">admin@donmenu.com</p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* User section collapsed */}
+      {collapsed && (
+        <div className="absolute bottom-0 left-0 right-0 p-2 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-center">
+            <div className="w-8 h-8 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+              <span className="text-gray-600 dark:text-gray-300 font-medium text-sm">U</span>
             </div>
           </div>
         </div>

@@ -100,6 +100,7 @@ model Ingredient {
   min_stock          Decimal?           @db.Decimal(10, 2)
   restaurant_id      Int
   supplier           String?            @db.VarChar(255)
+  image_url          String?            @db.VarChar(500)
   updated_at         DateTime           @updatedAt
   prices             IngredientPrice[]
   restaurant         Restaurant         @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
@@ -188,6 +189,11 @@ model Menu {
   id            Int        @id @default(autoincrement())
   sort_order    Int        @default(0)
   type          String     @db.VarChar(50)
+  is_promotional Boolean   @default(false)
+  discount_percentage Decimal? @db.Decimal(5, 2)
+  valid_from    DateTime?
+  valid_to      DateTime?
+  image_url     String?    @db.VarChar(500)
   updated_at    DateTime   @updatedAt
   items         MenuItem[]
   restaurant    Restaurant @relation(fields: [restaurant_id], references: [id], onDelete: Cascade)
@@ -195,6 +201,7 @@ model Menu {
   @@unique([restaurant_id, name])
   @@index([restaurant_id])
   @@index([restaurant_id, active])
+  @@index([restaurant_id, is_promotional])
   @@map("menus")
 }
 

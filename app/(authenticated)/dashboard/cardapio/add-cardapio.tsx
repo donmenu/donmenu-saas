@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, TextInput, Title, Text } from '@tremor/react';
 import supabase from '../../../../lib/supabase';
 import type { Cardapio } from '../../../../types/cardapio';
@@ -9,9 +9,10 @@ interface AddCardapioProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  preSelectedMenuId?: number | null;
 }
 
-export default function AddCardapio({ isOpen, onClose, onSuccess }: AddCardapioProps) {
+export default function AddCardapio({ isOpen, onClose, onSuccess, preSelectedMenuId }: AddCardapioProps) {
   const [item, setItem] = useState('');
   const [price, setPrice] = useState('');
   const [menuId, setMenuId] = useState('');
@@ -19,6 +20,12 @@ export default function AddCardapio({ isOpen, onClose, onSuccess }: AddCardapioP
   const [active, setActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (preSelectedMenuId) {
+      setMenuId(preSelectedMenuId.toString());
+    }
+  }, [preSelectedMenuId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

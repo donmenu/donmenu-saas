@@ -34,13 +34,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Obter restaurant_id do usuário logado
       const restaurantId = await getRestaurantIdFromSession(req, res)
       
-      const { name, description, type, sort_order } = req.body
+      const { 
+        name, 
+        description, 
+        type, 
+        sort_order, 
+        is_promotional, 
+        discount_percentage, 
+        valid_from, 
+        valid_to, 
+        image_url 
+      } = req.body
 
       // Validações
       if (!name) {
         return res.status(400).json({ 
           error: 'Nome do menu é obrigatório' 
         })
+      }
+
+      // Validações para cardápios promocionais
+      if (is_promotional) {
+        if (!discount_percentage || discount_percentage <= 0 || discount_percentage > 100) {
+          return res.status(400).json({ 
+            error: 'Desconto deve ser entre 0.01% e 100% para cardápios promocionais' 
+          })
+        }
       }
 
       // Verificar se já existe um menu com o mesmo nome no restaurante
@@ -64,6 +83,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description: description?.trim() || null,
           type: type?.trim() || 'principal',
           sort_order: sort_order ? Number(sort_order) : 0,
+          is_promotional: is_promotional || false,
+          discount_percentage: is_promotional ? Number(discount_percentage) : null,
+          valid_from: is_promotional && valid_from ? new Date(valid_from) : null,
+          valid_to: is_promotional && valid_to ? new Date(valid_to) : null,
+          image_url: image_url?.trim() || null,
           restaurant_id: restaurantId,
           active: true
         }

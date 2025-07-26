@@ -5,4 +5,9 @@ export interface Ingredient {
   cost_per_unit: number;
   stock?: number;
   created_at?: string;
+  image_url?: string;
+  description?: string;
+  supplier?: string;
+  current_stock?: number;
+  min_stock?: number;
 } 

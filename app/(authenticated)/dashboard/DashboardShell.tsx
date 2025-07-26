@@ -23,7 +23,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
       />
       <main
         className="flex-1 overflow-y-auto transition-all duration-300"
-        style={{ paddingLeft: sidebarWidth }}
+        style={{ marginLeft: sidebarWidth }}
       >
         {children}
       </main>

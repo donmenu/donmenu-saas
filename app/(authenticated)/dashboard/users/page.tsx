@@ -51,8 +51,8 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
 
   return (
     <DashboardShell>
-      {/* Header com métricas */}
-      <main className="p-4 md:p-10 mx-auto max-w-7xl">
+      <div className="p-6">
+        {/* Header com métricas */}
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
             <div>
@@ -117,7 +117,7 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
         <Card className="bg-white shadow-xl border-0 rounded-xl overflow-hidden">
           <div className="p-6 border-b border-gray-100">
             <Title className="text-xl font-semibold text-gray-800">Lista de Usuários</Title>
-            <Text className="text-gray-600 mt-1">Visualize e gerencie todos os usuários do sistema</Text>
+            <Text className="text-gray-600 mt-1">Visualize e gerencie todos os usuários</Text>
           </div>
           
           <div className="p-6">
@@ -154,7 +154,7 @@ export default function IndexPage({ searchParams }: { searchParams: { q: string 
           onClose={() => setIsAddModalOpen(false)}
           onSuccess={handleAddSuccess}
         />
-      </main>
+      </div>
     </DashboardShell>
   )
 }

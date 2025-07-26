@@ -309,7 +309,7 @@ export default function PlaygroundPage() {
 
   return (
     <DashboardShell>
-      <main className="p-4 md:p-10 mx-auto max-w-7xl">
+      <div className="p-6">
         <DashboardOnboarding />
         <QuickActions />
         <Insights />
@@ -351,7 +351,7 @@ export default function PlaygroundPage() {
             </Card>
           </Grid>
         </div>
-      </main>
+      </div>
     </DashboardShell>
   );
 }
